@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>퇴직연금 규약 자동생성기</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/niceplugin/NanumBarunGothic/NanumBarunGothic.css');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #ffffff; font-family: 'NanumBarunGothic','Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
+    input, select, textarea { color: #1f2937 !important; }
+    input:focus, select:focus { border-color: #557DB9 !important; outline: none; }
+    button:hover { opacity: 0.85; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+    .hl { background: #e8e8e8; padding: 1px 3px; border-radius: 3px; }
+  </style>
+  <script>
+window.__dl=null;
+(async()=>{try{if(window.claude&&window.claude.use){window.__dl=await window.claude.use("downloads");}}catch(e){}})();
+async function __saveDocx(blob, filename){
+  const name=(filename||"규약.docx").replace(/[\\/:*?"<>|]/g,"_");
+  if(window.__copyMode){window.__copyMode=false;__showCopyFallback(blob,name);return;}
+  if(!window.claude){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);return;}
+  if(window.__dl){
+    try{await window.__dl.save({filename:name,data:blob});return;}
+    catch(e){ window.__lastDlErr=(e&&e.code)||String(e); }
+  }
+  __showCopyFallback(blob,name);
+}
+async function __showCopyFallback(blob,name){
+  let html="";
+  try{const r=await mammoth.convertToHtml({arrayBuffer:await blob.arrayBuffer()});html=r.value;}catch(e){html="<p>문서를 불러오지 못했습니다.</p>";}
+  const docHtml='<div style="font-family:\'맑은 고딕\',\'Malgun Gothic\',sans-serif;font-size:10pt;line-height:1.6">'+html.replace(/<table>/g,'<table border="1" style="border-collapse:collapse;width:100%">').replace(/<td>/g,'<td style="border:1px solid #444;padding:4px 6px;font-size:10pt">')+'</div>';
+  const old=document.getElementById("__cpov");if(old)old.remove();
+  const ov=document.createElement("div");ov.id="__cpov";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px";
+  ov.innerHTML='<div style="background:#fff;color:#111;border-radius:12px;max-width:760px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;font-family:sans-serif">'+
+   '<div style="padding:16px 20px;border-bottom:1px solid #eee"><div style="font-weight:700;font-size:16px;margin-bottom:6px">Word 파일 받기</div>'+
+   '<div style="font-size:13px;color:#444;line-height:1.5">공유 링크에서는 파일 다운로드가 제한됩니다. 아래 <b>서식째 복사</b>를 누른 뒤 Word 새 문서에 붙여넣고(⌘V / Ctrl+V) <b>'+name.replace(/</g,"&lt;")+'</b>로 저장하세요. 조문·표·굵은 글씨가 그대로 옮겨집니다.</div>'+
+   '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button id="__cpbtn" style="background:#1e40af;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer">서식째 복사</button>'+
+   '<button id="__cpclose" style="background:#eee;border:0;border-radius:8px;padding:10px 16px;cursor:pointer">닫기</button><span id="__cpmsg" style="font-size:13px;align-self:center;color:#065f46"></span></div></div>'+
+   '<div id="__cpdoc" style="overflow:auto;padding:20px 28px;background:#fafafa"></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector("#__cpdoc").innerHTML=docHtml;
+  ov.querySelector("#__cpclose").onclick=()=>ov.remove();
+  ov.querySelector("#__cpbtn").onclick=async()=>{
+    const msg=ov.querySelector("#__cpmsg");const box=ov.querySelector("#__cpdoc");
+    let ok=false;
+    try{
+      const r=document.createRange();r.selectNodeContents(box);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+      ok=document.execCommand("copy");
+    }catch(_){ok=false;}
+    if(!ok){
+      try{
+        await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob(["<html><body>"+docHtml+"</body></html>"],{type:"text/html"}),"text/plain":new Blob([box.innerText],{type:"text/plain"})})]);
+        ok=true;
+      }catch(_){}
+    }
+    msg.textContent=ok?"복사됐습니다. Word에 붙여넣으세요. 안 붙여지면 아래 문서가 선택된 상태에서 ⌘C / Ctrl+C를 눌러 주세요.":"아래 문서가 선택됐습니다. ⌘C / Ctrl+C로 복사하세요.";
+    if(!ok){const r=document.createRange();r.selectNodeContents(box);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}
+  };
+}
+</script><script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+  <script>
+    // 코드 보호
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) e.preventDefault();
+      if (e.key === 'F12') e.preventDefault();
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'i' || e.key === 'I' || e.key === 'j' || e.key === 'J' || e.key === 'c' || e.key === 'C')) e.preventDefault();
+    });
+
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+const { useState, useRef, useEffect } = React;
+
+const STEPS = ["기업정보","제도설계","퇴직연금사업자","세부설정","규약생성"];
+const INDUSTRY_OPTIONS = ["제조업","건설업","도·소매업","숙박·음식점업","운수·창고업","정보통신업","금융·보험업","부동산업","전문·과학·기술서비스업","교육서비스업","보건·사회복지서비스업","기타 서비스업"];
+const SECURITIES = ["한국투자증권","미래에셋증권","현대차증권","아이엠증권","삼성증권","NH투자증권","신한투자증권","대신증권","KB증권","하나증권","신영증권","유안타증권","한화투자증권"];
+const BANKS = ["KB국민은행","신한은행","우리은행","IBK기업은행","하나은행","NH농협은행","KDB산업은행","부산은행","경남은행","아이엠뱅크","광주은행","제주은행","전북은행"];
+const INSURANCE = ["삼성생명","교보생명","삼성화재","한화생명","KB손해보험","미래에셋생명","동양생명","DB손해보험","현대해상","흥국생명","IBK연금보험","롯데손해보험","푸본현대생명","신한라이프","한화손해보험","하나생명"];
+
+function formatBizNo(v) { const n=v.replace(/\D/g,"").slice(0,10); if(n.length<=3)return n; if(n.length<=5)return n.slice(0,3)+"-"+n.slice(3); return n.slice(0,3)+"-"+n.slice(3,5)+"-"+n.slice(5); }
+function hl(v) { return `<span class="hl">${v}</span>`; }
+function formatDate(d) { if(!d)return"0000년 00월 00일"; return d.replace(/-/g,".").replace(/(\d{4})\.(\d{2})\.(\d{2})/,"$1년 $2월 $3일"); }
+
+function Field({label,required,children}){return(<div style={S.field}><label style={S.label}>{label}{required&&<span style={{color:"#e74c3c"}}> *</span>}</label>{children}</div>);}
+
+// ─── 업종·규모별 스마트 추천 ────────────────────────
+const SMART_RECS = {
+  "제조업":{tip:"제조업은 생산직·사무직 혼재 시 '전체 근로자' 적용이 일반적입니다. 교대근무자의 임금 산정 시 야간수당 포함 여부를 확인하세요."},
+  "건설업":{tip:"건설업은 현장 근로자 이직률이 높아 월 납입이 권장됩니다. 일용직은 별도 퇴직금 제도 적용 대상인지 확인하세요."},
+  "도·소매업":{tip:"파트타임 근로자가 많은 경우 주 15시간 미만자 제외 조항이 실무적으로 중요합니다."},
+  "숙박·음식점업":{tip:"계절 변동이 큰 업종이므로 월 납입 방식이 자금 관리에 유리합니다. 팁·봉사료는 임금총액 포함 여부를 확인하세요."},
+  "정보통신업":{tip:"IT 기업은 스톡옵션 행사이익의 임금 해당 여부에 유의하세요. 소규모 스타트업은 임원 포함이 일반적입니다."},
+  "금융·보험업":{tip:"성과급 비중이 높은 경우 부담금 산정 기준 임금의 범위를 명확히 규정하는 것이 중요합니다."},
+  "전문·과학·기술서비스업":{tip:"소규모 전문직 법인은 대표·임원도 실질적 근로를 제공하는 경우가 많아 임원 포함을 검토하세요."},
+  "교육서비스업":{tip:"학기제 계약직 강사의 경우 계속근로기간 1년 미만 제외 조항 적용에 유의하세요."},
+  "보건·사회복지서비스업":{tip:"3교대 근무가 일반적이므로 야간근로수당 등이 임금총액에 정확히 반영되어야 합니다."},
+};
+function getRec(industry,count){const n=Number(count)||0;const base=SMART_RECS[industry];if(!base)return null;const rec={...base};
+  if(n<10) rec.sizeNote="10인 미만 소규모 사업장입니다. 운용관리·자산관리기관을 동일 기관으로 선정하면 관리가 편리합니다.";
+  else if(n<30) rec.sizeNote="10~29인 사업장입니다. 대부분 전체 근로자를 가입대상으로 합니다.";
+  else if(n<100) rec.sizeNote="30~99인 사업장입니다. 근로자대표 선정 절차를 사전에 확인하세요.";
+  else if(n<300) rec.sizeNote="100~299인 사업장입니다. 복수 퇴직연금사업자 선정을 통한 경쟁 구도 확보를 권장합니다.";
+  else rec.sizeNote="300인 이상 사업장입니다. 퇴직연금사업자 선정·변경 사유서(별지) 작성이 의무입니다.";
+  return rec;
+}
+function SmartRec({industry,count}) {
+  const rec=getRec(industry,count); if(!rec) return null;
+  return (<div style={S.recBox}>
+    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}><span style={{fontSize:16}}>💡</span><span style={{fontSize:13,fontWeight:700,color:"#3730a3"}}>업종·규모 기반 추천</span></div>
+    <p style={{fontSize:12,color:"#4338ca",margin:0,lineHeight:1.6}}>{rec.tip}</p>
+    {rec.sizeNote&&<p style={{fontSize:12,color:"#4338ca",margin:0,lineHeight:1.6,marginTop:6,paddingTop:6,borderTop:"1px solid #e0e7ff"}}>{rec.sizeNote}</p>}
+  </div>);
+}
+
+// ─── Type Selection ─────────────────────────────────
+function TypeSelect({onSelect}) {
+  return (
+    <div style={{...S.root,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px"}}>
+      <h1 style={{fontSize:22,fontWeight:800,color:"#5A2800",marginBottom:6}}>퇴직연금 규약 자동생성</h1>
+      <p style={{fontSize:13,color:"#6b7280",marginBottom:36}}>근로자퇴직급여 보장법 기반 · 중소기업 디지털 가입 지원</p>
+      <div style={{display:"flex",gap:16,width:"100%",maxWidth:560}}>
+        {[{type:"DC",line1:"확정기여형",line2:"DC형"},
+          {type:"DB",line1:"확정급여형",line2:"DB형"},
+          {type:"HY",line1:"혼합형",line2:"DB+DC"}
+        ].map(item=>(
+          <button key={item.type} onClick={()=>onSelect(item.type)} style={S.typeCard}>
+            <div style={{fontSize:15,fontWeight:800,color:"#5A2800",lineHeight:1.6}}>{item.line1}<br/>{item.line2}</div>
+          </button>
+        ))}
+      </div>
+      <div style={{display:"flex",gap:16,width:"100%",maxWidth:560,marginTop:12}}>
+        <p style={{flex:1,fontSize:12,color:"#6b7280",lineHeight:1.5,textAlign:"center"}}>근로자가 적립금 운용방법을 선택. 부담금은 연간 임금총액의 1/12 이상.</p>
+        <p style={{flex:1,fontSize:12,color:"#6b7280",lineHeight:1.5,textAlign:"center"}}>사용자가 투자 위험 부담. 퇴직일 기준 30일분 평균임금 × 근속연수 보장.</p>
+        <p style={{flex:1,fontSize:12,color:"#6b7280",lineHeight:1.5,textAlign:"center"}}>DB형과 DC형을 동시 설정. 각각의 설정비율 합이 100% 이상.</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Step 1 ─────────────────────────────────────────
+function Step1({data,set}) {
+  return (<div style={S.stepContent}>
+    <h2 style={S.stepTitle}>기업 기본정보 입력</h2>
+    <p style={S.stepDesc}>사업자등록증 기준으로 입력해주세요.</p>
+    <div style={S.grid2}>
+      <Field label="회사명 (상호)" required><input style={S.input} placeholder="(주)○○○○" value={data.companyName||""} onChange={e=>set("companyName",e.target.value)} /></Field>
+      <Field label="사업자등록번호" required><input style={S.input} placeholder="000-00-00000" value={data.bizNo||""} onChange={e=>set("bizNo",formatBizNo(e.target.value))} /></Field>
+      <Field label="대표자 성명" required><input style={S.input} placeholder="홍길동" value={data.ceoName||""} onChange={e=>set("ceoName",e.target.value)} /></Field>
+      <Field label="업종" required><select style={S.input} value={data.industry||""} onChange={e=>set("industry",e.target.value)}><option value="">선택하세요</option>{INDUSTRY_OPTIONS.map(o=><option key={o} value={o}>{o}</option>)}</select></Field>
+      <Field label="상시 근로자 수" required><input style={S.input} type="number" min="1" placeholder="예: 30" value={data.employeeCount||""} onChange={e=>set("employeeCount",e.target.value)} /></Field>
+      <Field label="노동조합원 수"><input style={S.input} type="number" min="0" placeholder="없으면 0" value={data.unionCount||""} onChange={e=>set("unionCount",e.target.value)} /></Field>
+    </div>
+    <Field label="사업장 주소" required><input style={{...S.input,width:"100%"}} placeholder="서울시 ○○구 ○○로 ○○번길 ○○" value={data.address||""} onChange={e=>set("address",e.target.value)} /></Field>
+    <div style={S.grid2}>
+      <Field label="전화번호"><input style={S.input} placeholder="02-0000-0000" value={data.phone||""} onChange={e=>set("phone",e.target.value)} /></Field>
+      <Field label="팩스번호"><input style={S.input} placeholder="02-0000-0000" value={data.fax||""} onChange={e=>set("fax",e.target.value)} /></Field>
+    </div>
+  </div>);
+}
+
+// ─── Step 2: DC ──────────────────────────────────────
+function Step2DC({data,set}) {
+  return (<div style={S.stepContent}>
+    <h2 style={S.stepTitle}>제도 설계 (DC형)</h2>
+    <p style={S.stepDesc}>확정기여형 퇴직연금의 세부 설계 사항을 결정합니다.</p>
+    <SmartRec industry={data.industry} count={data.employeeCount} />
+    <Field label="가입대상 범위" required>
+      <select style={S.input} value={data.coverageType||"all"} onChange={e=>set("coverageType",e.target.value)}>
+        <option value="all">전체 근로자</option><option value="specific_group">특정 근로자 집단</option>
+        <option value="after_date">특정시점 이후 입사자</option><option value="choice">복수 제도 중 선택</option>
+      </select>
+    </Field>
+    {data.coverageType==="specific_group"&&<Field label="가입대상 근로자 집단 명시"><input style={S.input} placeholder="예: 생산직, 부장 직급 이하" value={data.specificGroup||""} onChange={e=>set("specificGroup",e.target.value)} /></Field>}
+    {data.coverageType==="after_date"&&<Field label="기준 입사일"><input style={S.input} type="date" value={data.cutoffDate||""} onChange={e=>set("cutoffDate",e.target.value)} /></Field>}
+    <Field label="임원 포함 여부">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeExecutives!==true} onChange={()=>set("includeExecutives",false)} /> 제외</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeExecutives===true} onChange={()=>set("includeExecutives",true)} /> 포함</label>
+      </div>
+    </Field>
+    <ExecutiveInfoBox />
+    <Field label="계속근로기간 1년 미만자 가입 허용">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder1Year!==true} onChange={()=>{set("includeUnder1Year",false);set("excludeUnder1YearBenefit",false);}} /> 제외 (법 기본)</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder1Year===true} onChange={()=>set("includeUnder1Year",true)} /> 포함</label>
+      </div>
+    </Field>
+    {data.includeUnder1Year&&(
+      <Field label="1년 미만 가입자 급여지급">
+        <div style={S.radioGroup}>
+          <label style={S.radioLabel}><input type="radio" checked={data.excludeUnder1YearBenefit!==true} onChange={()=>set("excludeUnder1YearBenefit",false)} /> 급여 지급 (가입대상과 동일)</label>
+          <label style={S.radioLabel}><input type="radio" checked={data.excludeUnder1YearBenefit===true} onChange={()=>set("excludeUnder1YearBenefit",true)} /> 급여 미지급 (가입만 허용)</label>
+        </div>
+        {data.excludeUnder1YearBenefit&&<p style={{fontSize:11.5,color:"#9ca3af",marginTop:4,fontStyle:"italic"}}>※ 가입대상에는 포함하되, 계속근로기간 1년 미만인 가입자가 자격을 상실한 경우 급여를 지급하지 않습니다.</p>}
+      </Field>
+    )}
+    <Field label="주 15시간 미만 근로자 가입 허용">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder15Hour!==true} onChange={()=>set("includeUnder15Hour",false)} /> 제외 (법 기본)</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder15Hour===true} onChange={()=>set("includeUnder15Hour",true)} /> 포함</label>
+      </div>
+    </Field>
+    <Field label="부담금 수준 (연간 임금총액 대비)" required>
+      <select style={S.input} value={data.contributionRate||"12분의 1"} onChange={e=>set("contributionRate",e.target.value)}>
+        <option value="12분의 1">12분의 1 (법정 최소)</option><option value="12분의 1.5">12분의 1.5</option>
+        <option value="10분의 1">10분의 1</option><option value="8분의 1">8분의 1</option><option value="기타">기타</option>
+      </select>
+    </Field>
+    {data.contributionRate==="기타"&&(
+      <div style={S.warningBox}>
+        <span style={{fontSize:18,marginRight:8,flexShrink:0}}>⚠️</span>
+        <span style={{fontSize:12.5,color:"#92400e",lineHeight:1.6}}>퇴직연금 담당 컨설턴트와 상담 후에 본 규약을 생성할 수 있습니다. 법정 최소 기준(12분의 1) 미만으로 설정할 수 없으며, 누진율 적용 등 특수한 경우 별도 조항 작성이 필요합니다.</span>
+      </div>
+    )}
+    <Field label="부담금 납입 주기" required>
+      <select style={S.input} value={data.paymentCycle||"monthly"} onChange={e=>set("paymentCycle",e.target.value)}>
+        <option value="monthly">매월 말일</option><option value="semiannual">매 반기 말일</option><option value="quarterly">매분기 말일</option><option value="yearly">매년 말일</option>
+      </select>
+    </Field>
+    <Field label="경영성과급 DC 적립 (경성 DC)">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.performanceDC!==true} onChange={()=>set("performanceDC",false)} /> 미적용</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.performanceDC===true} onChange={()=>set("performanceDC",true)} /> 적용</label>
+      </div>
+    </Field>
+    {data.performanceDC&&(<>
+      <div style={{...S.infoBox,padding:"10px 14px"}}><div style={{fontSize:16,flexShrink:0}}>ℹ️</div><p style={{fontSize:12.5,color:"#5A2800",margin:0}}>경영성과급을 차등 기준별 비율로 DC 계정에 추가 납입합니다.</p></div>
+      <Field label="직원 차등 기준" required>
+        <select style={S.input} value={data.perfCriteria||"tenure"} onChange={e=>set("perfCriteria",e.target.value)}>
+          <option value="tenure">근속년수</option>
+          <option value="other">기타</option>
+        </select>
+      </Field>
+      {data.perfCriteria==="other"&&(
+        <div style={S.warningBox}><span style={{fontSize:18,marginRight:8,flexShrink:0}}>⚠️</span><span style={{fontSize:12.5,color:"#92400e",lineHeight:1.6}}>퇴직연금 담당 컨설턴트와 상담 후에 경영성과급 적립 기준을 설정해주세요.</span></div>
+      )}
+      {(data.perfCriteria||"tenure")==="tenure"&&(<>
+        <p style={{fontSize:12,color:"#6b7280",marginBottom:8}}>구간과 DC 적립비율(%)을 입력하세요. 현금 지급비율은 자동 계산됩니다.</p>
+        {(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}]).map((tier,i)=>(
+          <div key={i} style={{display:"flex",gap:8,marginBottom:6,alignItems:"center"}}>
+            <input style={{...S.input,flex:1}} placeholder={data.perfCriteria==="rank"?"예: 부장 이상":"예: 16년 이상"} value={tier.label} onChange={e=>{const t=[...(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}])];t[i]={...t[i],label:e.target.value};set("perfTiers",t);}} />
+            <input style={{...S.input,width:80}} type="number" min="0" max="100" placeholder="%" value={tier.rate} onChange={e=>{const t=[...(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}])];t[i]={...t[i],rate:e.target.value};set("perfTiers",t);}} />
+            <span style={{fontSize:12,color:"#6b7280",flexShrink:0,width:60}}>현금 {100-Number(tier.rate||0)}%</span>
+            {(data.perfTiers||[{},{},{}]).length>1&&<button style={{border:"none",background:"none",color:"#dc2626",cursor:"pointer",fontSize:16,flexShrink:0}} onClick={()=>{const t=[...(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}])];t.splice(i,1);set("perfTiers",t);}}>✕</button>}
+          </div>
+        ))}
+        <button style={{...S.backBtn,fontSize:12,padding:"6px 14px",marginTop:4,marginBottom:16}} onClick={()=>{const t=[...(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}])];t.push({label:"",rate:""});set("perfTiers",t);}}>+ 항목 추가</button>
+      </>)}
+      {data.includeExecutives&&(
+        <Field label="임원 경성 DC 적립비율 (%)">
+          <input style={S.input} type="number" min="0" max="100" placeholder="임원 별도 적립비율" value={data.perfRateExec||""} onChange={e=>set("perfRateExec",e.target.value)} />
+          <p style={{fontSize:11.5,color:"#9ca3af",marginTop:4,fontStyle:"italic"}}>※ 임원 포함 시 임원에 대한 경영성과급 DC 적립비율을 별도로 설정합니다.</p>
+        </Field>
+      )}
+    </>)}
+    <Field label="과거근로기간 소급 적용">
+      <select style={S.input} value={data.retroactive||"none"} onChange={e=>set("retroactive",e.target.value)}>
+        <option value="none">소급 없음</option><option value="full">전부 소급</option><option value="partial">일부 소급</option>
+      </select>
+    </Field>
+    {data.retroactive==="full"&&<p style={{fontSize:11.5,color:"#6b7280",marginTop:-8,marginBottom:12,fontStyle:"italic"}}>※ 이 제도 설정 이전의 전체 근로기간을 가입기간에 포함합니다. 다만, 퇴직금을 미리 정산한 기간은 제외됩니다.</p>}
+    {data.retroactive==="partial"&&(<><p style={{fontSize:11.5,color:"#6b7280",marginTop:-8,marginBottom:8,fontStyle:"italic"}}>※ 지정한 기준일 이후의 과거근로기간만 가입기간에 포함합니다. 퇴직금 미리 정산 기간은 제외됩니다.</p><Field label="소급 기준일"><input style={S.input} type="date" value={data.retroDate||""} onChange={e=>set("retroDate",e.target.value)} /></Field></>)}
+  </div>);
+}
+
+// ─── Step 2: DB ──────────────────────────────────────
+function Step2DB({data,set}) {
+  return (<div style={S.stepContent}>
+    <h2 style={S.stepTitle}>제도 설계 (DB형)</h2>
+    <p style={S.stepDesc}>확정급여형 퇴직연금의 급여수준 및 가입대상을 설정합니다.</p>
+    <SmartRec industry={data.industry} count={data.employeeCount} />
+    <div style={S.infoBox}>
+      <div style={{fontSize:18,flexShrink:0}}>ℹ️</div>
+      <div><p style={{fontSize:12.5,color:"#5A2800",margin:0,lineHeight:1.6}}><b>DB형의 핵심:</b> 사용자가 투자 위험을 부담하며, 퇴직일 기준 계속근로기간 1년당 30일분 평균임금 이상을 보장합니다.</p></div>
+    </div>
+    <Field label="급여수준 산정방식" required>
+      <select style={S.input} value={data.benefitType||"standard"} onChange={e=>set("benefitType",e.target.value)}>
+        <option value="standard">법정 기본 (계속근로기간 1년당 30일분 평균임금)</option>
+        <option value="progressive">근속연수 누진율 적용</option>
+      </select>
+    </Field>
+    <Field label="임금피크제·근로시간 단축 시 급여 보전 (법 제32조④)">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.wagepeakProtection!==true} onChange={()=>set("wagepeakProtection",false)} /> 별도 규정 없음</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.wagepeakProtection===true} onChange={()=>set("wagepeakProtection",true)} /> 별도 급여 산정 기준 마련</label>
+      </div>
+    </Field>
+    <Field label="가입대상 범위" required>
+      <select style={S.input} value={data.coverageType||"all"} onChange={e=>set("coverageType",e.target.value)}>
+        <option value="all">전체 근로자</option><option value="specific_group">특정 근로자 집단</option>
+        <option value="after_date">특정시점 이후 입사자</option><option value="choice">복수 제도 중 선택</option>
+      </select>
+    </Field>
+    {data.coverageType==="specific_group"&&<Field label="가입대상 근로자 집단 명시"><input style={S.input} placeholder="예: 생산직, 부장 직급 이하" value={data.specificGroup||""} onChange={e=>set("specificGroup",e.target.value)} /></Field>}
+    {data.coverageType==="after_date"&&<Field label="기준 입사일"><input style={S.input} type="date" value={data.cutoffDate||""} onChange={e=>set("cutoffDate",e.target.value)} /></Field>}
+    <Field label="임원 포함 여부">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeExecutives!==true} onChange={()=>set("includeExecutives",false)} /> 제외</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeExecutives===true} onChange={()=>set("includeExecutives",true)} /> 포함</label>
+      </div>
+    </Field>
+    <ExecutiveInfoBox />
+    <Field label="계속근로기간 1년 미만자 가입 허용">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder1Year!==true} onChange={()=>{set("includeUnder1Year",false);set("excludeUnder1YearBenefit",false);}} /> 제외 (법 기본)</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder1Year===true} onChange={()=>set("includeUnder1Year",true)} /> 포함</label>
+      </div>
+    </Field>
+    {data.includeUnder1Year&&(
+      <Field label="1년 미만 가입자 급여지급">
+        <div style={S.radioGroup}>
+          <label style={S.radioLabel}><input type="radio" checked={data.excludeUnder1YearBenefit!==true} onChange={()=>set("excludeUnder1YearBenefit",false)} /> 급여 지급</label>
+          <label style={S.radioLabel}><input type="radio" checked={data.excludeUnder1YearBenefit===true} onChange={()=>set("excludeUnder1YearBenefit",true)} /> 급여 미지급 (가입만 허용)</label>
+        </div>
+        {data.excludeUnder1YearBenefit&&<p style={{fontSize:11.5,color:"#9ca3af",marginTop:4,fontStyle:"italic"}}>※ 가입대상에는 포함하되, 계속근로기간 1년 미만인 가입자가 자격을 상실한 경우 급여를 지급하지 않습니다.</p>}
+      </Field>
+    )}
+    <Field label="주 15시간 미만 근로자 가입 허용">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder15Hour!==true} onChange={()=>set("includeUnder15Hour",false)} /> 제외 (법 기본)</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder15Hour===true} onChange={()=>set("includeUnder15Hour",true)} /> 포함</label>
+      </div>
+    </Field>
+    <Field label="과거근로기간 소급 적용">
+      <select style={S.input} value={data.retroactive||"none"} onChange={e=>set("retroactive",e.target.value)}>
+        <option value="none">소급 없음</option><option value="full">전부 소급</option><option value="partial">일부 소급</option>
+      </select>
+    </Field>
+    {data.retroactive==="full"&&<p style={{fontSize:11.5,color:"#6b7280",marginTop:-8,marginBottom:12,fontStyle:"italic"}}>※ 이 제도 설정 이전의 전체 근로기간을 가입기간에 포함합니다. 다만, 퇴직금을 미리 정산한 기간은 제외됩니다.</p>}
+    {data.retroactive==="partial"&&(<><p style={{fontSize:11.5,color:"#6b7280",marginTop:-8,marginBottom:8,fontStyle:"italic"}}>※ 지정한 기준일 이후의 과거근로기간만 가입기간에 포함합니다. 퇴직금 미리 정산 기간은 제외됩니다.</p><Field label="소급 기준일"><input style={S.input} type="date" value={data.retroDate||""} onChange={e=>set("retroDate",e.target.value)} /></Field></>)}
+  </div>);
+}
+
+function ExecutiveInfoBox() {
+  return (<div style={S.caseBox}>
+    <div style={S.caseLabel}>안내</div>
+    <p style={{fontSize:12.5,color:"#6b7280",margin:"0 0 6px",lineHeight:1.6}}>근로기준법상 <b>임원(등기이사 등)</b>은 원칙적으로 근로자에 해당하지 않아 퇴직연금 가입대상이 아닙니다. 다만, 실질적으로 근로를 제공하고 임금을 받는 경우 규약에 별도로 포함할 수 있습니다.</p>
+    <p style={{fontSize:11.5,color:"#9ca3af",margin:0,lineHeight:1.5,fontStyle:"italic"}}>※ 임원을 포함하는 경우, 해당 임원이 근로자성을 갖추고 있는지 사전 확인이 필요합니다.</p>
+  </div>);
+}
+
+// ─── Step 2: 혼합형 ─────────────────────────────────
+function Step2HY({data,set}) {
+  return (<div style={S.stepContent}>
+    <h2 style={S.stepTitle}>제도 설계 (혼합형)</h2>
+    <p style={S.stepDesc}>DB형과 DC형을 동시에 설정합니다. 각각의 설정비율을 정해주세요.</p>
+    <SmartRec industry={data.industry} count={data.employeeCount} />
+    <div style={S.infoBox}><div style={{fontSize:16,flexShrink:0}}>ℹ️</div><p style={{fontSize:12.5,color:"#5A2800",margin:0}}>DB 설정비율 + DC 설정비율의 합이 100% 이상이어야 합니다.</p></div>
+    <h3 style={S.subTitle}>설정비율 (제6조)</h3>
+    <div style={S.grid2}>
+      <Field label="DB 급여 설정비율 (%)" required><input style={S.input} type="number" min="0" max="100" value={data.dbRatio||""} placeholder="예: 50" onChange={e=>set("dbRatio",e.target.value)} /></Field>
+      <Field label="DC 부담금 설정비율 (%)" required><input style={S.input} type="number" min="0" max="100" value={data.dcRatio||""} placeholder="예: 50" onChange={e=>set("dcRatio",e.target.value)} /></Field>
+    </div>
+    {(Number(data.dbRatio||0)+Number(data.dcRatio||0))>0&&(Number(data.dbRatio||0)+Number(data.dcRatio||0))<100&&(
+      <div style={S.warningBox}><span style={{fontSize:18,marginRight:8,flexShrink:0}}>⚠️</span><span style={{fontSize:12.5,color:"#92400e"}}>DB + DC 설정비율 합이 100% 미만입니다. 합이 100% 이상이어야 합니다.</span></div>
+    )}
+    <h3 style={S.subTitle}>가입대상</h3>
+    <Field label="가입대상 범위" required>
+      <select style={S.input} value={data.coverageType||"all"} onChange={e=>set("coverageType",e.target.value)}>
+        <option value="all">전체 근로자</option><option value="choice">복수 제도 중 선택</option>
+      </select>
+    </Field>
+    <Field label="임원 포함 여부">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeExecutives!==true} onChange={()=>set("includeExecutives",false)} /> 제외</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeExecutives===true} onChange={()=>set("includeExecutives",true)} /> 포함</label>
+      </div>
+    </Field>
+    <ExecutiveInfoBox />
+    <Field label="계속근로기간 1년 미만자 가입 허용">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder1Year!==true} onChange={()=>{set("includeUnder1Year",false);set("excludeUnder1YearBenefit",false);}} /> 제외 (법 기본)</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder1Year===true} onChange={()=>set("includeUnder1Year",true)} /> 포함</label>
+      </div>
+    </Field>
+    {data.includeUnder1Year&&(
+      <Field label="1년 미만 가입자 급여지급">
+        <div style={S.radioGroup}>
+          <label style={S.radioLabel}><input type="radio" checked={data.excludeUnder1YearBenefit!==true} onChange={()=>set("excludeUnder1YearBenefit",false)} /> 급여 지급</label>
+          <label style={S.radioLabel}><input type="radio" checked={data.excludeUnder1YearBenefit===true} onChange={()=>set("excludeUnder1YearBenefit",true)} /> 급여 미지급 (가입만 허용)</label>
+        </div>
+      </Field>
+    )}
+    <Field label="주 15시간 미만 근로자 가입 허용">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder15Hour!==true} onChange={()=>set("includeUnder15Hour",false)} /> 제외 (법 기본)</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.includeUnder15Hour===true} onChange={()=>set("includeUnder15Hour",true)} /> 포함</label>
+      </div>
+    </Field>
+    <h3 style={S.subTitle}>DB형 설정</h3>
+    <Field label="임금피크제·근로시간 단축 시 급여 보전">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.wagepeakProtection!==true} onChange={()=>set("wagepeakProtection",false)} /> 별도 규정 없음</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.wagepeakProtection===true} onChange={()=>set("wagepeakProtection",true)} /> 별도 급여 산정 기준 마련</label>
+      </div>
+    </Field>
+    <h3 style={S.subTitle}>DC형 설정</h3>
+    <Field label="DC 부담금 수준 (연간 임금총액 대비)" required>
+      <select style={S.input} value={data.contributionRate||"12분의 1"} onChange={e=>set("contributionRate",e.target.value)}>
+        <option value="12분의 1">12분의 1 (법정 최소)</option><option value="12분의 1.5">12분의 1.5</option>
+        <option value="10분의 1">10분의 1</option><option value="8분의 1">8분의 1</option><option value="기타">기타</option>
+      </select>
+    </Field>
+    {data.contributionRate==="기타"&&(
+      <div style={S.warningBox}><span style={{fontSize:18,marginRight:8,flexShrink:0}}>⚠️</span><span style={{fontSize:12.5,color:"#92400e",lineHeight:1.6}}>퇴직연금 담당 컨설턴트와 상담 후에 본 규약을 생성할 수 있습니다.</span></div>
+    )}
+    <Field label="경영성과급 DC 적립 (경성 DC)">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.performanceDC!==true} onChange={()=>set("performanceDC",false)} /> 미적용</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.performanceDC===true} onChange={()=>set("performanceDC",true)} /> 적용</label>
+      </div>
+    </Field>
+    {data.performanceDC&&(<>
+      <div style={{...S.infoBox,padding:"10px 14px"}}><div style={{fontSize:16,flexShrink:0}}>ℹ️</div><p style={{fontSize:12.5,color:"#5A2800",margin:0}}>경영성과급을 차등 기준별 비율로 DC 계정에 추가 납입합니다.</p></div>
+      <Field label="직원 차등 기준" required>
+        <select style={S.input} value={data.perfCriteria||"tenure"} onChange={e=>set("perfCriteria",e.target.value)}>
+          <option value="tenure">근속년수</option>
+          <option value="other">기타</option>
+        </select>
+      </Field>
+      {data.perfCriteria==="other"&&(
+        <div style={S.warningBox}><span style={{fontSize:18,marginRight:8,flexShrink:0}}>⚠️</span><span style={{fontSize:12.5,color:"#92400e",lineHeight:1.6}}>퇴직연금 담당 컨설턴트와 상담 후에 경영성과급 적립 기준을 설정해주세요.</span></div>
+      )}
+      {(data.perfCriteria||"tenure")==="tenure"&&(<>
+        <p style={{fontSize:12,color:"#6b7280",marginBottom:8}}>구간과 DC 적립비율(%)을 입력하세요. 현금 지급비율은 자동 계산됩니다.</p>
+        {(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}]).map((tier,i)=>(
+          <div key={i} style={{display:"flex",gap:8,marginBottom:6,alignItems:"center"}}>
+            <input style={{...S.input,flex:1}} placeholder="예: 16년 이상" value={tier.label} onChange={e=>{const t=[...(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}])];t[i]={...t[i],label:e.target.value};set("perfTiers",t);}} />
+            <input style={{...S.input,width:80}} type="number" min="0" max="100" placeholder="%" value={tier.rate} onChange={e=>{const t=[...(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}])];t[i]={...t[i],rate:e.target.value};set("perfTiers",t);}} />
+            <span style={{fontSize:12,color:"#6b7280",flexShrink:0,width:60}}>현금 {100-Number(tier.rate||0)}%</span>
+            {(data.perfTiers||[{},{},{}]).length>1&&<button style={{border:"none",background:"none",color:"#dc2626",cursor:"pointer",fontSize:16,flexShrink:0}} onClick={()=>{const t=[...(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}])];t.splice(i,1);set("perfTiers",t);}}>✕</button>}
+          </div>
+        ))}
+        <button style={{...S.backBtn,fontSize:12,padding:"6px 14px",marginTop:4,marginBottom:16}} onClick={()=>{const t=[...(data.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}])];t.push({label:"",rate:""});set("perfTiers",t);}}>+ 항목 추가</button>
+      </>)}
+      {data.includeExecutives&&(
+        <Field label="임원 경성 DC 적립비율 (%)">
+          <input style={S.input} type="number" min="0" max="100" placeholder="임원 별도 적립비율" value={data.perfRateExec||""} onChange={e=>set("perfRateExec",e.target.value)} />
+          <p style={{fontSize:11.5,color:"#9ca3af",marginTop:4,fontStyle:"italic"}}>※ 임원 포함 시 임원에 대한 경영성과급 DC 적립비율을 별도로 설정합니다.</p>
+        </Field>
+      )}
+    </>)}
+    <Field label="과거근로기간 소급 적용">
+      <select style={S.input} value={data.retroactive||"none"} onChange={e=>set("retroactive",e.target.value)}>
+        <option value="none">소급 없음</option><option value="full">전부 소급</option><option value="partial">일부 소급</option>
+      </select>
+    </Field>
+    {data.retroactive==="full"&&<p style={{fontSize:11.5,color:"#6b7280",marginTop:-8,marginBottom:12,fontStyle:"italic"}}>※ 이 제도 설정 이전의 전체 근로기간을 가입기간에 포함합니다.</p>}
+    {data.retroactive==="partial"&&(<><p style={{fontSize:11.5,color:"#6b7280",marginTop:-8,marginBottom:8,fontStyle:"italic"}}>※ 지정한 기준일 이후의 과거근로기간만 가입기간에 포함합니다.</p><Field label="소급 기준일"><input style={S.input} type="date" value={data.retroDate||""} onChange={e=>set("retroDate",e.target.value)} /></Field></>)}
+  </div>);
+}
+
+// ─── Step 3: 퇴직연금사업자 ─────────────────────────
+function Step3({data,set,planType}) {
+  const toggleProvider=(field,name)=>{const list=data[field]||[];set(field,list.includes(name)?list.filter(n=>n!==name):[...list,name]);};
+  const ProviderGrid=({field,options,label})=>(
+    <Field label={label}><div style={S.chipGrid}>{options.map(name=>{const sel=(data[field]||[]).includes(name);return(<button key={name} style={{...S.chip,...(sel?S.chipActive:{})}} onClick={()=>toggleProvider(field,name)}>{sel&&"✓ "}{name}</button>);})}</div></Field>
+  );
+  const allOps=[...(data.operationManagers||[]),...(data.operationManagersBanks||[]),...(data.operationManagersIns||[])];
+  if(planType==="HY") {
+    const dbOps=[...(data.dbOperationManagers||[]),...(data.dbOperationManagersBanks||[]),...(data.dbOperationManagersIns||[])];
+    const dcOps=[...(data.dcOperationManagers||[]),...(data.dcOperationManagersBanks||[]),...(data.dcOperationManagersIns||[])];
+    const dbAssets=[...(data.dbAssetManagers||[]),...(data.dbAssetManagersBanks||[]),...(data.dbAssetManagersIns||[])];
+    const dcAssets=[...(data.dcAssetManagers||[]),...(data.dcAssetManagersBanks||[]),...(data.dcAssetManagersIns||[])];
+    return (<div style={S.stepContent}>
+      <h2 style={S.stepTitle}>퇴직연금사업자 선정 (혼합형)</h2>
+      <p style={S.stepDesc}>DB형과 DC형의 운용관리기관·자산관리기관을 각각 선정하세요.</p>
+      <div style={S.infoBox}><div style={{fontSize:16,flexShrink:0}}>ℹ️</div><p style={{fontSize:12.5,color:"#5A2800",margin:0}}>혼합형은 DB와 DC 각각 별도의 사업자를 선정합니다. 동일 기관 선택도 가능합니다.</p></div>
+      <h3 style={S.subTitle}>DB형 운용관리기관</h3>
+      <ProviderGrid field="dbOperationManagers" options={SECURITIES} label="증권사" />
+      <ProviderGrid field="dbOperationManagersBanks" options={BANKS} label="은행" />
+      <ProviderGrid field="dbOperationManagersIns" options={INSURANCE} label="보험사" />
+      {dbOps.length>1&&<Field label="DB 간사기관" required><select style={S.input} value={data.dbLeadProvider||""} onChange={e=>set("dbLeadProvider",e.target.value)}><option value="">선택하세요</option>{dbOps.map(o=><option key={o} value={o}>{o}</option>)}</select></Field>}
+      <h3 style={{...S.subTitle,marginTop:28}}>DB형 자산관리기관</h3>
+      <ProviderGrid field="dbAssetManagers" options={SECURITIES} label="증권사" />
+      <ProviderGrid field="dbAssetManagersBanks" options={BANKS} label="은행" />
+      <ProviderGrid field="dbAssetManagersIns" options={INSURANCE} label="보험사" />
+      <h3 style={{...S.subTitle,marginTop:28,paddingTop:16,borderTop:"1px solid #e5e7eb"}}>DC형 운용관리기관</h3>
+      <ProviderGrid field="dcOperationManagers" options={SECURITIES} label="증권사" />
+      <ProviderGrid field="dcOperationManagersBanks" options={BANKS} label="은행" />
+      <ProviderGrid field="dcOperationManagersIns" options={INSURANCE} label="보험사" />
+      <h3 style={{...S.subTitle,marginTop:28}}>DC형 자산관리기관</h3>
+      <ProviderGrid field="dcAssetManagers" options={SECURITIES} label="증권사" />
+      <ProviderGrid field="dcAssetManagersBanks" options={BANKS} label="은행" />
+      <ProviderGrid field="dcAssetManagersIns" options={INSURANCE} label="보험사" />
+    </div>);
+  }
+  return (<div style={S.stepContent}>
+    <h2 style={S.stepTitle}>퇴직연금사업자 선정</h2>
+    <p style={S.stepDesc}>운용관리기관 및 자산관리기관을 선택하세요. 복수 선택 가능합니다.</p>
+    <h3 style={S.subTitle}>운용관리기관</h3>
+    <ProviderGrid field="operationManagers" options={SECURITIES} label="증권사" />
+    <ProviderGrid field="operationManagersBanks" options={BANKS} label="은행" />
+    <ProviderGrid field="operationManagersIns" options={INSURANCE} label="보험사" />
+    {planType==="DB"&&allOps.length>1&&(
+      <Field label="간사기관 (대표 퇴직연금사업자)" required>
+        <select style={S.input} value={data.leadProvider||""} onChange={e=>set("leadProvider",e.target.value)}>
+          <option value="">선택하세요</option>{allOps.map(o=><option key={o} value={o}>{o}</option>)}
+        </select>
+      </Field>
+    )}
+    <h3 style={{...S.subTitle,marginTop:28}}>자산관리기관</h3>
+    <ProviderGrid field="assetManagers" options={SECURITIES} label="증권사" />
+    <ProviderGrid field="assetManagersBanks" options={BANKS} label="은행" />
+    <ProviderGrid field="assetManagersIns" options={INSURANCE} label="보험사" />
+  </div>);
+}
+
+// ─── Step 4: 세부설정 ───────────────────────────────
+function Step4({data,set,planType}) {
+  const isLarge=Number(data.employeeCount)>=300;
+  const dateLabel=data.regulationType==="change"?"규약 변경일":"제도 시행일";
+  return (<div style={S.stepContent}>
+    <h2 style={S.stepTitle}>세부 설정</h2>
+    <Field label="규약 신고 유형">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.regulationType!=="change"} onChange={()=>set("regulationType","new")} /> 신규 설정</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.regulationType==="change"} onChange={()=>set("regulationType","change")} /> 규약 변경</label>
+      </div>
+    </Field>
+    <Field label={dateLabel} required><input style={S.input} type="date" value={data.startDate||""} onChange={e=>set("startDate",e.target.value)} /></Field>
+    <div style={S.caseBox}>
+      <div style={S.caseLabel}>사례</div>
+      <p style={{fontSize:12.5,color:"#6b7280",margin:"0 0 8px",lineHeight:1.6}}>규약을 <b>변경</b>하는 경우 부칙 제1조 문구가 자동으로 달라집니다.</p>
+      <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:8}}>
+        <div style={{display:"flex",alignItems:"flex-start",gap:8}}><span style={{flexShrink:0,fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:4,background:"#dbeafe",color:"#1e40af",marginTop:1}}>신규</span><span style={{fontSize:12,color:"#4b5563",lineHeight:1.6,background:"#fff",padding:"4px 8px",borderRadius:6,border:"1px solid #e5e7eb",flex:1}}>이 제도는 0000년 00월 00일부터 <b>시행</b>한다.</span></div>
+        <div style={{display:"flex",alignItems:"flex-start",gap:8}}><span style={{flexShrink:0,fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:4,background:"#fef3c7",color:"#92400e",marginTop:1}}>변경</span><span style={{fontSize:12,color:"#4b5563",lineHeight:1.6,background:"#fff",padding:"4px 8px",borderRadius:6,border:"1px solid #e5e7eb",flex:1}}>이 제도는 0000년 00월 00일부터 <b>변경하여 시행</b>한다.</span></div>
+      </div>
+      <p style={{fontSize:11.5,color:"#9ca3af",margin:0,lineHeight:1.5,fontStyle:"italic"}}>※ 실무에서 자주 누락되는 부분이니 주의하세요.</p>
+    </div>
+    {planType==="DC"&&(<>
+      <Field label="부담금 미납 시 연장기간">
+        <select style={S.input} value={data.extensionPeriod||"1month"} onChange={e=>set("extensionPeriod",e.target.value)}>
+          <option value="1month">1개월</option><option value="2month">2개월</option>
+        </select>
+      </Field>
+      <Field label="다른 퇴직연금제도(DB/혼합형) 전환권 부여">
+        <div style={S.radioGroup}>
+          <label style={S.radioLabel}><input type="radio" checked={data.allowConversion!==true} onChange={()=>set("allowConversion",false)} /> 미부여</label>
+          <label style={S.radioLabel}><input type="radio" checked={data.allowConversion===true} onChange={()=>set("allowConversion",true)} /> 부여</label>
+        </div>
+      </Field>
+      {data.allowConversion&&(<>
+        <div style={S.caseBox}>
+          <div style={S.caseLabel}>안내</div>
+          <p style={{fontSize:12.5,color:"#6b7280",margin:0,lineHeight:1.6}}>DC제도에서 DB제도로 전환은 제도특성상 <b>전환시점 이후의 기간에 대해서만 가능</b>(소급 불가)하며, 전환 이후 기존 DC제도에서의 적립금은 퇴직 등 지급사유 발생 시까지 DC제도에서 운용되어야 합니다.</p>
+        </div>
+        <Field label="제도 전환 구체적 사항 (선택 입력)">
+          <textarea style={{...S.input,width:"100%",minHeight:80,resize:"vertical",fontFamily:"inherit"}} placeholder="예: 전환 신청 기간은 매년 1월 1일부터 1월 31일까지로 한다.&#10;전환을 신청한 가입자의 전환 시행일은 해당 연도 4월 1일로 한다." value={data.conversionDetails||""} onChange={e=>set("conversionDetails",e.target.value)} />
+          <p style={{fontSize:11,color:"#9ca3af",marginTop:4}}>※ 줄바꿈(Enter) 시 각 줄이 ②항, ③항, ④항... 순으로 자동 생성됩니다. 미입력 시 "구체적 사항은 사용자가 별도로 정한다"로 기본 생성됩니다.</p>
+        </Field>
+      </>)}
+    </>)}
+    {planType==="DB"&&(<>
+      <Field label="부담금 납입 기한 (매년)" required>
+        <div style={S.grid2}>
+          <select style={S.input} value={data.contribMonth||"12"} onChange={e=>set("contribMonth",e.target.value)}>{Array.from({length:12},(_,i)=><option key={i+1} value={String(i+1)}>{i+1}월</option>)}</select>
+          <select style={S.input} value={data.contribDay||"31"} onChange={e=>set("contribDay",e.target.value)}>{[1,10,15,20,25,28,30,31].map(d=><option key={d} value={String(d)}>{d}일</option>)}</select>
+        </div>
+      </Field>
+      <Field label="제도 전환권 부여 (DB→DC 전환)">
+        <div style={S.radioGroup}>
+          <label style={S.radioLabel}><input type="radio" checked={data.allowConversion!==true} onChange={()=>set("allowConversion",false)} /> 미부여</label>
+          <label style={S.radioLabel}><input type="radio" checked={data.allowConversion===true} onChange={()=>set("allowConversion",true)} /> 부여</label>
+        </div>
+      </Field>
+      {data.allowConversion&&(
+        <Field label="제도 전환 구체적 사항 (선택 입력)">
+          <textarea style={{...S.input,width:"100%",minHeight:80,resize:"vertical",fontFamily:"inherit"}} placeholder="예: 전환 신청 기간은 매년 1월 1일부터 1월 31일까지로 한다.&#10;전환을 신청한 가입자의 전환 시행일은 해당 연도 4월 1일로 한다." value={data.conversionDetails||""} onChange={e=>set("conversionDetails",e.target.value)} />
+          <p style={{fontSize:11,color:"#9ca3af",marginTop:4}}>※ 줄바꿈(Enter) 시 각 줄이 ②항, ③항, ④항... 순으로 자동 생성됩니다. 미입력 시 "구체적 사항은 사용자가 별도로 정한다"로 기본 생성됩니다.</p>
+        </Field>
+      )}
+    </>)}
+    {planType==="HY"&&(<>
+      <Field label="DC 부담금 납입 주기" required>
+        <select style={S.input} value={data.paymentCycle||"monthly"} onChange={e=>set("paymentCycle",e.target.value)}>
+          <option value="monthly">매월 말일</option><option value="semiannual">매 반기 말일</option><option value="quarterly">매분기 말일</option><option value="yearly">매년 말일</option>
+        </select>
+      </Field>
+      <Field label="DB 부담금 납입 기한 (매년)" required>
+        <div style={S.grid2}>
+          <select style={S.input} value={data.contribMonth||"12"} onChange={e=>set("contribMonth",e.target.value)}>{Array.from({length:12},(_,i)=><option key={i+1} value={String(i+1)}>{i+1}월</option>)}</select>
+          <select style={S.input} value={data.contribDay||"31"} onChange={e=>set("contribDay",e.target.value)}>{[1,10,15,20,25,28,30,31].map(d=><option key={d} value={String(d)}>{d}일</option>)}</select>
+        </div>
+      </Field>
+      <Field label="DC 부담금 미납 시 연장기간">
+        <select style={S.input} value={data.extensionPeriod||"2month"} onChange={e=>set("extensionPeriod",e.target.value)}>
+          <option value="1month">1개월</option><option value="2month">2개월</option>
+        </select>
+      </Field>
+      <Field label="제도 전환권 부여">
+        <div style={S.radioGroup}>
+          <label style={S.radioLabel}><input type="radio" checked={data.allowConversion!==true} onChange={()=>set("allowConversion",false)} /> 미부여</label>
+          <label style={S.radioLabel}><input type="radio" checked={data.allowConversion===true} onChange={()=>set("allowConversion",true)} /> 부여</label>
+        </div>
+      </Field>
+      {data.allowConversion&&(
+        <Field label="제도 전환 구체적 사항 (선택 입력)">
+          <textarea style={{...S.input,width:"100%",minHeight:80,resize:"vertical",fontFamily:"inherit"}} placeholder="예: 전환 신청 기간은 매년 1월 1일부터 1월 31일까지로 한다." value={data.conversionDetails||""} onChange={e=>set("conversionDetails",e.target.value)} />
+          <p style={{fontSize:11,color:"#9ca3af",marginTop:4}}>※ 줄바꿈(Enter) 시 각 줄이 ②항, ③항... 순으로 자동 생성됩니다.</p>
+        </Field>
+      )}
+    </>)}
+    <h3 style={S.subTitle}>신고서 정보</h3>
+    <Field label="발급번호"><input style={S.input} placeholder="예: 제2026-001호" value={data.issueNo||""} onChange={e=>set("issueNo",e.target.value)} /></Field>
+    <div style={S.grid2}>
+      <Field label="접수일"><input style={S.input} type="date" value={data.receiptDate||""} onChange={e=>set("receiptDate",e.target.value)} /></Field>
+      <Field label="발급일"><input style={S.input} type="date" value={data.issueDate||""} onChange={e=>set("issueDate",e.target.value)} /></Field>
+    </div>
+    <Field label="의견청취일 또는 동의일"><input style={S.input} type="date" value={data.opinionDate||""} onChange={e=>set("opinionDate",e.target.value)} /></Field>
+    <Field label="관할 지방고용노동청">
+      <select style={S.input} value={data.laborOffice||""} onChange={e=>set("laborOffice",e.target.value)}>
+        <option value="">선택하세요</option>
+        <option value="서울지방고용노동청장">서울지방고용노동청</option><option value="서울강남지청장">서울강남지청</option><option value="서울동부지청장">서울동부지청</option><option value="서울서부지청장">서울서부지청</option><option value="서울남부지청장">서울남부지청</option><option value="서울북부지청장">서울북부지청</option><option value="서울관악지청장">서울관악지청</option>
+        <option value="중부지방고용노동청장">중부지방고용노동청</option><option value="인천북부지청장">인천북부지청</option><option value="부천지청장">부천지청</option><option value="의정부지청장">의정부지청</option><option value="고양지청장">고양지청</option><option value="경기지청장">경기지청</option><option value="성남지청장">성남지청</option><option value="안양지청장">안양지청</option><option value="안산지청장">안산지청</option><option value="평택지청장">평택지청</option>
+        <option value="부산지방고용노동청장">부산지방고용노동청</option><option value="부산동부지청장">부산동부지청</option><option value="창원지청장">창원지청</option><option value="울산지청장">울산지청</option><option value="양산지청장">양산지청</option>
+        <option value="대구지방고용노동청장">대구지방고용노동청</option><option value="대구서부지청장">대구서부지청</option><option value="포항지청장">포항지청</option><option value="구미지청장">구미지청</option>
+        <option value="광주지방고용노동청장">광주지방고용노동청</option><option value="전주지청장">전주지청</option><option value="익산지청장">익산지청</option><option value="목포지청장">목포지청</option><option value="여수지청장">여수지청</option><option value="제주지청장">제주지청</option>
+        <option value="대전지방고용노동청장">대전지방고용노동청</option><option value="청주지청장">청주지청</option><option value="천안지청장">천안지청</option><option value="충주지청장">충주지청</option>
+        <option value="강원지방고용노동청장">강원지방고용노동청</option><option value="강릉지청장">강릉지청</option><option value="원주지청장">원주지청</option><option value="태백지청장">태백지청</option>
+      </select>
+    </Field>
+    <Field label="회계 결산월" required>
+      <select style={S.input} value={data.fiscalMonth||"12"} onChange={e=>set("fiscalMonth",e.target.value)}>{Array.from({length:12},(_,i)=><option key={i+1} value={String(i+1)}>{i+1}월</option>)}</select>
+    </Field>
+    <Field label="가입자 교육 위탁 여부">
+      <div style={S.radioGroup}>
+        <label style={S.radioLabel}><input type="radio" checked={data.educationDelegate!==false} onChange={()=>set("educationDelegate",true)} /> 퇴직연금사업자에 위탁</label>
+        <label style={S.radioLabel}><input type="radio" checked={data.educationDelegate===false} onChange={()=>set("educationDelegate",false)} /> 직접 실시</label>
+      </div>
+    </Field>
+    {isLarge&&(<>
+      <h3 style={{...S.subTitle,marginTop:24}}>퇴직연금사업자 선정 사유서 (별지)</h3>
+      <p style={{fontSize:12,color:"#6b7280",marginBottom:12}}>300인 이상 사업장은 사유서 작성이 의무입니다. 아래 항목을 선택해주세요.</p>
+      <Field label="평가기준 - 정량평가 (복수 선택)">
+        {["재무안정성","자산운용실적","고객만족도"].map(o=>(
+          <label key={o} style={{...S.radioLabel,marginRight:14}}><input type="checkbox" checked={(data.quantEval||["재무안정성","자산운용실적","고객만족도"]).includes(o)} onChange={e=>{const cur=data.quantEval||["재무안정성","자산운용실적","고객만족도"];set("quantEval",e.target.checked?[...cur,o]:cur.filter(x=>x!==o));}} /> {o}</label>
+        ))}
+      </Field>
+      <Field label="평가기준 - 정성평가 (복수 선택)">
+        {["제도운용역량","자산운용역량","서비스제공역량"].map(o=>(
+          <label key={o} style={{...S.radioLabel,marginRight:14}}><input type="checkbox" checked={(data.qualEval||["제도운용역량","자산운용역량","서비스제공역량"]).includes(o)} onChange={e=>{const cur=data.qualEval||["제도운용역량","자산운용역량","서비스제공역량"];set("qualEval",e.target.checked?[...cur,o]:cur.filter(x=>x!==o));}} /> {o}</label>
+        ))}
+      </Field>
+      <Field label="근로자대표 참여 여부">
+        <div style={S.radioGroup}>
+          <label style={S.radioLabel}><input type="radio" checked={data.workerRepParticipated===true} onChange={()=>set("workerRepParticipated",true)} /> 참여</label>
+          <label style={S.radioLabel}><input type="radio" checked={data.workerRepParticipated===false} onChange={()=>set("workerRepParticipated",false)} /> 불참</label>
+        </div>
+      </Field>
+      <Field label="선정 사유 (직접 입력)">
+        <textarea style={{...S.input,width:"100%",minHeight:60,resize:"vertical",fontFamily:"inherit"}} placeholder="예: 종업원의 퇴직급여 수급권 강화를 위해 당사가 설정한 재무건전성 및 정성 기준에 충족하는 사업자를 선정" value={data.selectionReason||""} onChange={e=>set("selectionReason",e.target.value)} />
+      </Field>
+    </>)}
+  </div>);
+}
+
+// ─── 규약 생성: DC형 ────────────────────────────────
+function generateDC(d) {
+  const allOps=[...(d.operationManagers||[]),...(d.operationManagersBanks||[]),...(d.operationManagersIns||[])];
+  const allAssets=[...(d.assetManagers||[]),...(d.assetManagersBanks||[]),...(d.assetManagersIns||[])];
+  const multi=allOps.length>1; const multiA=allAssets.length>1; const isSmall=Number(d.employeeCount)<300;
+  const sf=formatDate(d.startDate); const h=hl;
+  const payLabel=d.paymentCycle==="monthly"?"매월 말일":d.paymentCycle==="semiannual"?"매 반기 말일":d.paymentCycle==="quarterly"?"매분기 말일":"매년 말일";
+  const ext=d.extensionPeriod==="2month"?"2개월":"1개월";
+  const ct=d.coverageType;
+
+  // 제10조
+  let a10="";
+  if(ct==="all") a10=`제10조(가입대상) 이 제도의 가입대상은 이 사업에 소속된 모든 근로자로 한다.`;
+  else if(ct==="specific_group") a10=`제10조(가입대상) 이 제도의 가입대상은 이 사업에 소속된 ${h(d.specificGroup||"(     )")} 근로자로 한다.`;
+  else if(ct==="after_date") a10=`제10조(가입대상) 이 제도의 가입대상은 이 사업에 소속된 근로자 중 ${h(formatDate(d.cutoffDate))} 이후 입사한 자로 한다.`;
+  else a10=`제10조(가입대상) ① 이 제도의 가입대상은 이 사업에 소속된 근로자 중 이 제도 가입을 신청하는 자로 한다.\n ② 이 사업에 소속된 근로자 중 가입할 퇴직급여제도의 종류를 선택하지 아니한 근로자의 경우 이 제도의 가입대상으로 본다.`;
+  // 단서
+  const excl1=!d.includeUnder1Year, excl15=!d.includeUnder15Hour;
+  let excl="";
+  if(excl1&&excl15) excl=" 다만 계속근로기간이 1년 미만인 근로자, 4주간을 평균하여 1주간의 소정근로시간이 15시간 미만인 근로자에 대하여는 그러하지 아니하다.";
+  else if(excl1) excl=" 다만 계속근로기간이 1년 미만인 근로자에 대하여는 그러하지 아니하다.";
+  else if(excl15) excl=" 다만 4주간을 평균하여 1주간의 소정근로시간이 15시간 미만인 근로자에 대하여는 그러하지 아니하다.";
+  a10+=excl;
+  if(d.includeExecutives) a10+=` 이 제도의 가입대상에는 사용자와 사용종속 관계에서 근로를 제공하고 임금을 받는 임원(등기이사 포함)을 포함한다.`;
+
+  // 제11조
+  const a11_1=ct==="choice"?"이 제도의 가입을 신청한 날을 가입자 자격 취득일로 본다.":"이 제도 설정 이후 가입대상이 되는 날을 가입자 자격 취득일로 본다.";
+
+  // 제12조
+  let a12=`제12조(가입기간) 이 제도의 설정일 이후 가입자가 이 사업에서 근로를 제공한 날부터 제11조제2항 각 호별 자격 상실의 사유가 발생한 날까지를 가입기간으로 한다.`;
+  if(d.retroactive==="full") a12=`제12조(가입기간) ① 이 제도의 설정일 이후 가입자가 이 사업에서 근로를 제공한 날부터 제11조제2항 각 호별 자격 상실의 사유가 발생한 날까지를 가입기간으로 한다.\n ② 제1항에도 불구하고 이 제도의 설정 이전에 이 사업에서 근로를 제공한 기간(이하 "과거근로기간"이라 한다)이 있는 가입자에 대하여는 과거근로기간을 가입기간에 포함한다. 이 경우 법 제8조제2항에 따라 퇴직금을 미리 정산한 기간은 제외한다.`;
+  else if(d.retroactive==="partial") a12=`제12조(가입기간) ① 이 제도의 설정일 이후 가입자가 이 사업에서 근로를 제공한 날부터 제11조제2항 각 호별 자격 상실의 사유가 발생한 날까지를 가입기간으로 한다.\n ② 제1항에도 불구하고 이 제도의 설정 이전에 이 사업에서 근로를 제공한 기간(이하 "과거근로기간"이라 한다)이 있는 가입자에 대하여는 ${h(formatDate(d.retroDate))} 이후 과거근로기간을 가입기간에 포함한다. 이 경우 법 제8조제2항에 따라 퇴직금을 미리 정산한 기간은 제외한다.`;
+
+  // 사업자
+  const opsD=multi?`[별지]와 같이 선정한다.`:`다음과 같이 선정한다.\n\n    명칭: ${h(allOps[0]||"○○○○")}`;
+  const assD=multiA?`[별지]와 같이 선정한다.`:`다음과 같이 선정한다.\n\n    명칭: ${h(allAssets[0]||"○○○○")}`;
+  const a8_2=isSmall?"":`\n ② 사용자가 제6조 또는 제7조에 따른 퇴직연금사업자를 선정하거나 변경한 사유 등은 [별지]와 같다.`;
+  const a9=(multi||multiA)?`\n\n제9조(퇴직연금사업자 선택) 가입자는 제6조 및 제7조에 따라 선정된 퇴직연금사업자 중 각각 하나의 기관을 운용관리기관 및 자산관리기관으로 선택하여 가입한다.`:"";
+
+  // 부담금 산정 제13조 추가항 (소급 시)
+  let a13_3="";
+  if(d.retroactive!=="none") a13_3=`\n ③ 제1항에도 불구하고 과거근로기간에 대한 부담금은 과거근로기간을 가입기간에 포함하기로 한 시점을 기준으로 산정하되, 아래 각 호의 금액 중 큰 금액을 부담금으로 납입하여야 한다.\n  1. 과거근로기간 1년에 대하여 기준시점 이전 1년간 지급받은 임금총액의 12분의 1에 상당하는 금액\n  2. 과거근로기간 1년에 대하여 기준시점을 산정사유 발생일로 하여 산정한 30일분 평균임금에 상당하는 금액`;
+
+  // 제17조 단서 (1년 미만 가입 시 급여 지급 제외 옵션은 일단 기본형)
+  const a17=`제17조(급여의 지급사유 발생) 급여의 지급사유는 이 제도의 가입자가 제11조제2항제1호부터 제3호까지의 어느 하나에 해당되어 가입자 자격을 상실하게 된 경우 발생한다.${d.excludeUnder1YearBenefit?" 다만 계속근로기간 1년 미만인 가입자가 그 자격을 상실한 경우에는 그러하지 아니한다.":""}`;
+
+  // 전환권 (DC→DB) - 부칙 제2조로 이동
+  let convArt="";
+  if(d.allowConversion){
+    const nums="①②③④⑤⑥⑦⑧⑨⑩";
+    let details="";
+    if(d.conversionDetails&&d.conversionDetails.trim()){
+      const lines=d.conversionDetails.trim().split("\n").filter(l=>l.trim());
+      details=lines.map((l,i)=>` ${nums[i+1]} ${h(l.trim())}`).join("\n");
+    } else {
+      details=` ② 제1항에 따른 제도전환 기준 및 절차 등 구체적 사항은 사용자가 별도로 정한다.`;
+    }
+    convArt=`\n제2조(제도의 전환) ① 사용자는 이 제도 가입자에게 확정급여형(또는 혼합형)퇴직연금제도로 전환할 수 있는 기회를 부여할 수 있다.\n${details}`;
+  }
+
+  // 별지
+  let app="";
+  if(multi){app+=`\n\n[별지] 이 제도의 운용관리기관 (제6조 관련)\n\n`;allOps.forEach((o,i)=>{app+=`    ${i+1}. ${h(o)}\n`;});}
+  if(multiA){app+=`\n\n[별지] 이 제도의 자산관리기관 (제7조 관련)\n\n`;allAssets.forEach((o,i)=>{app+=`    ${i+1}. ${h(o)}\n`;});}
+  if(!isSmall){
+    const qe=(d.quantEval||["재무안정성","자산운용실적","고객만족도"]).map(h).join(", ");
+    const ql=(d.qualEval||["제도운용역량","자산운용역량","서비스제공역량"]).map(h).join(", ");
+    const wp=d.workerRepParticipated===true?h("☑ 참여   □ 불참"):d.workerRepParticipated===false?h("□ 참여   ☑ 불참"):"□ 참여   □ 불참";
+    app+=`\n\n[별지] 퇴직연금사업자 선정(변경) 사유서 (제8조 관련)\n\n`;
+    app+=`  1. 퇴직연금사업자 선정(변경) 절차\n     근로자대표와 성실한 협의를 바탕으로 사업자 입찰경쟁 제안공고 후\n     입찰 참여기관 대상 공정한 정량/정성 평가 실시\n\n`;
+    app+=`  2. 평가기준 및 방법\n     [정량평가] ${qe}\n     [정성평가] ${ql}\n\n`;
+    app+=`  3. 선정결과\n     운용관리기관: ${allOps.map(h).join(", ")}\n     자산관리기관: ${allAssets.map(h).join(", ")}\n     선정 사유: ${h(d.selectionReason||"(선정 사유 입력 필요)")}\n\n`;
+    app+=`  4. 근로자대표 참여여부: ${wp}\n`;
+  }
+
+  return `확정기여형퇴직연금제도규약
+
+${h(d.companyName||"(주)○○○○")}
+
+
+제1장 총 칙
+
+제1조(명칭) 이 규약은 ${h(d.companyName||"(주)○○○○")}의 확정기여형퇴직연금제도규약이라 한다.
+
+제2조(목적) 이 규약은 「근로자퇴직급여 보장법」(이하 "법"이라 한다) 제19조에 따라 확정기여형퇴직연금제도의 설정 및 운영에 관한 사항을 정함으로써 이 제도 가입자의 안정적인 노후생활 보장에 이바지함을 목적으로 한다.
+
+제3조(정의) 이 규약에서 사용하는 용어의 뜻은 다음과 같다.
+  1. "사용자"란 법 제2조제2호의 규정에 따른 사용자를 말한다.
+  2. "근로자대표"란 법 제4조제3항의 규정에 따른 근로자대표를 말한다.
+  3. 그 밖의 용어의 뜻은 법에서 정한 바에 따른다.
+
+제4조(적용) 이 규약은 다음의 사업 또는 사업장(이하 "사업"이라 한다) 전체에 적용한다.
+    명칭: ${h(d.companyName||"(주)○○○○")}
+    주소: ${h(d.address||"○○시 ○○구 ○○로 ○○번지")}
+
+제5조(성실의무) 사용자 및 근로자는 이 규약과 관련 법령에서 정한 퇴직연금제도의 설정 및 운영에 관한 사항을 성실히 준수하여야 한다.
+
+
+제2장 퇴직연금사업자의 선정
+
+제6조(운용관리기관의 선정 및 변경) ① 사용자는 법 제28조에 따른 운용관리업무를 수행할 퇴직연금사업자(이하 "운용관리기관"이라 한다)를 ${opsD}
+ ② 사용자는 운용관리기관을 새로 추가하고자 하는 경우에는 근로자대표의 의견을 들어야 하며, 운용관리기관을 변경하고자 하는 경우에는 근로자대표의 동의를 받아야 한다.
+
+제7조(자산관리기관의 선정 및 변경) ① 사용자는 법 제29조에 따른 자산관리업무를 수행할 퇴직연금사업자(이하 "자산관리기관"이라 한다)를 ${assD}
+ ② 사용자는 자산관리기관을 새로 추가하고자 하는 경우에는 근로자대표의 의견을 들어야 하며, 자산관리기관을 변경하고자 하는 경우에는 근로자대표의 동의를 받아야 한다.
+
+제8조(퇴직연금사업자 선정·변경 시 사용자 책무) ① 사용자는 제6조 또는 제7조에 따른 퇴직연금사업자를 선정하거나 변경하는 경우, 관련 서비스 제공 등 퇴직연금제도 전반에 대한 능력과 전문성을 종합적으로 판단하여 정하여야 한다.${a8_2}${a9}
+
+
+제3장 가입자 및 가입기간
+
+${a10}
+
+제11조(가입자 자격 취득 및 상실) ① ${a11_1}
+ ② 다음 각 호에 해당하게 되는 날의 다음 날을 가입자 자격 상실일로 본다.
+  1. 가입자가 사망한 때
+  2. 퇴직, 해고, 그 밖에 취업규칙 또는 별도로 정하는 규정에 따른 사유로 고용 관계가 종료된 때
+  3. 이 제도를 폐지한 때
+ ③ 사용자는 가입자의 자격 취득 또는 상실 사유가 발생한 경우 그 사실을 운용관리기관에 전달하여 가입자의 자격 취득 및 상실 등의 업무처리가 이뤄지도록 하여야 한다.
+
+${a12}
+
+
+제4장 부담금
+
+제13조(부담금의 산정 및 부담) ① 사용자는 가입자의 연간 임금총액의 ${h(d.contributionRate||"12분의 1")}에 해당하는 금액을 통화로 가입자의 이 제도 계정에 납입하여야 한다.
+ ② 제1항의 연간 임금총액이라 함은 사용자가 가입자에게 지급한 근로기준법상 임금에 해당하는 금품의 연간 합계액을 말한다.${a13_3}
+ ${d.retroactive!=="none"?"④":"③"} 부담금 산정기간 중에 「근로기준법 시행령」 제2조제1항 각 호의 어느 하나에 해당하는 기간이나 「남녀고용평등과 일·가정 양립 지원에 관한 법률」 제19조의2에 따른 육아기 근로시간 단축 기간이 있는 경우, 제1항에 따른 부담금은 해당 기간에 지급된 임금을 제외한 연간 임금총액을 해당 기간을 제외한 연간 기간으로 나누어 산정한다.
+ ${d.retroactive!=="none"?"⑤":"④"} 가입자는 제1항에 따른 사용자 부담금 외에 스스로 부담하는 추가 부담금을 본인의 확정기여형퇴직연금제도 계정에 납입할 수 있다.
+
+제14조(부담금의 납입) ① 사용자는 제13조제1항에 따른 부담금을 ${h(payLabel)}까지 정기적으로 가입자의 확정기여형퇴직연금제도 계정에 납입하여야 한다.${d.retroactive!=="none"?`\n ② 사용자는 제13조제3항에 따른 부담금을 과거근로기간을 가입기간에 포함시킨 날에 일시 납입하여야 한다.\n ③ 제13조제${d.retroactive!=="none"?"5":"4"}항에 따른 추가 부담금은 가입자가 자산관리기관에 직접 납부할 수 있다.`:`\n ② 제13조제4항에 따른 추가 부담금은 가입자가 자산관리기관에 직접 납부할 수 있다.`}${d.performanceDC&&d.perfCriteria!=="other"?(()=>{
+    const pn=d.retroactive!=="none";
+    const artN=pn?"4":"3";
+    const ts='style="border:1px solid #999;padding:4px 10px;text-align:center;font-size:12px;"';
+    const th='style="border:1px solid #999;padding:4px 10px;text-align:center;font-size:12px;background:#f3f4f6;font-weight:bold;"';
+    let tableHtml="";
+    const tiers=d.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}];
+    const hdrCells=tiers.map(t=>`<td ${th}>근속기간(${h(t.label)})</td>`).join("");
+    const dcCells=tiers.map(t=>`<td ${ts}>${h(t.rate+"%")}</td>`).join("");
+    const cashCells=tiers.map(t=>`<td ${ts}>${h((100-Number(t.rate||0))+"%")}</td>`).join("");
+    const execSection=d.includeExecutives&&d.perfRateExec?`<p style="font-size:12.5px;font-weight:bold;margin:16px 0 6px;">＜임원 납입 비율＞</p><p style="font-size:12px;margin:4px 0;">임원 : 경영성과급 DC 납입비율 (단일율)</p><p style="font-size:12px;margin:4px 0;">단일율 : ${h(d.perfRateExec+"%")}</p><p style="font-size:11px;color:#666;margin:6px 0 0;font-style:italic;">단, 임원의 경우 위의 납입비율에 해당하는 금액이 세법상 임원 퇴직소득한도를 초과하는 경우에는 임원 퇴직소득한도 내에서 납부할 수 있다.</p>`:"";
+    tableHtml=`</pre><div style="margin:12px 0;"><p style="font-size:12.5px;font-weight:bold;margin-bottom:6px;">＜직원 납입 비율＞</p><table style="border-collapse:collapse;width:auto;"><tr><td ${th}>구분</td>${hdrCells}</tr><tr><td ${ts}>DC 적립 비율</td>${dcCells}</tr><tr><td ${ts}>현금 지급 비율</td>${cashCells}</tr></table>${execSection}</div><pre style="font-size:12.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word;font-family:'D2Coding','Nanum Gothic Coding',monospace;margin:0;color:#1f2937;">`;
+    return `\n ${pn?"④":"③"} 사용자는 제1항에 따른 사용자 부담금 외에 이 사업의 경영실적 등에 따라 지급여부 및 지급액이 결정되는 급여(이하 "경영성과급"이라 한다.)를 제10조에 따른 가입자 자격을 취득하는 날부터 다음의 납입비율로 가입자의 확정기여형퇴직연금제도 계정에 추가 납입하여야 한다.${tableHtml}\n ${pn?"⑤":"④"} 제${artN}항에도 불구하고 가입자는 다음 각 호에 해당하는 날에 경영성과급을 향후 적립하지 아니할 것을 선택할 수 있다.\n  1. 이 사업에 제${artN}항의 적립방식이 최초로 설정되는 날 (이 사업에 최초로 근무하게 된 날에 제${artN}항의 적립 방식이 이미 설정되어 있는 경우에는 제10조에 따른 가입 대상이 되는 날)\n  2. 제${artN}항의 적립방식이 변경되는 날\n ${pn?"⑥":"⑤"} 가입자는 제${artN}항에 따른 납입 비율을 임의로 변경하거나, 납입 중단 또는 추가 납입을 임의로 선택할 수 없다.`;
+  })():""}
+
+제15조(부담금 미납 시 처리) ① 사용자가 제13조제1항에 따른 부담금을 제14조제1항에 따라 정하여진 기일(이하 "정기 납입일"이라 한다)까지 납입하지 아니한 경우 정기 납입일로부터 ${h(ext)}이 되는 날까지 납부기간을 연장한다.
+ ② 법 제20조제3항 후단에 따라 제1항에 따라 연장된 기일까지 제13조제1항에 따른 부담금을 납입한 경우 지연이자는 적용하지 아니한다.
+ ③ 사용자가 제1항에 따라 연장된 기일까지 제13조제1항에 따른 부담금을 납입하지 아니하는 경우 그 연장된 기일 다음 날부터 부담금을 납입한 날까지 지연 일수에 대하여 다음 각 호의 구분에 따른 지연이자율을 적용하여 납입하여야 한다.
+  1. 제1항에 따라 연장된 납입 기일의 다음 날을 기산일로 하여 가입자의 퇴직 등 급여를 지급할 사유가 발생한 날부터 14일까지의 기간: 연 100분의 10
+  2. 제1호에 따른 기간의 다음 날부터 부담금을 납입하는 날까지의 기간: 연 100분의 20
+ ④ 제3항에도 불구하고 「근로자퇴직급여 보장법 시행령」(이하 "영"이라 한다) 제12조에 따라 지연이자의 적용제외 사유가 있는 경우에는 지연이자를 적용하지 아니한다.
+
+
+제5장 급여
+
+제16조(급여의 종류 및 수급요건) 이 제도에 따른 급여의 종류는 연금 또는 일시금으로 하되, 수급요건은 다음 각 호와 같다.
+  1. 연금은 55세 이상으로서 가입기간이 10년 이상인 가입자에게 지급할 것. 이 경우 연금의 지급기간은 5년 이상이어야 한다.
+  2. 일시금은 연금수급 요건을 갖추지 못하거나 일시금 수급을 원하는 가입자에게 지급할 것
+
+${a17}
+
+제18조(미납 부담금 등의 납입) ① 사용자는 급여를 지급할 사유가 발생한 경우 14일 이내에 제13조에 따른 부담금을 가입자의 이 제도 계정에 납입하여야 한다.
+ ② 사용자는 제15조제1항에 따른 미납 부담금이 있는 경우에는 그 미납 부담금과 제15조제3항에 따른 지연이자를 급여를 지급할 사유가 발생한 날부터 14일 이내에 해당 가입자의 이 제도의 계정에 납입하여야 한다.
+ ③ 사용자는 제1항 및 제2항에도 불구하고 특별한 사정이 있는 경우 가입자와의 합의에 따라 납입 기일을 연장할 수 있다.
+
+제19조(급여의 지급) ① 사용자는 이 제도의 급여를 지급하는 경우 가입자가 지정한 개인형퇴직연금제도의 계정 또는 중소기업퇴직연금기금제도의 가입자명의의 부담금 계정(이하 "개인형퇴직연금제도의 계정등"이라 한다)으로 이전하는 방법으로 한다.
+ ② 가입자는 이 제도 가입 이후 7일 이내에 제1항에 따른 급여를 이전받기 위한 개인형퇴직연금제도의 계정등을 설정하고 그 확인자료를 사용자에게 제출하는 등의 방법으로 지정의 의사를 표시하여야 한다.
+ ③ 제17조에 따른 급여의 지급사유가 발생될 예정이거나 발생했음에도 불구하고 가입자가 개인형퇴직연금제도의 계정등을 지정하지 아니한 경우, 사용자는 제1항에 따라 급여가 이전될 수 있도록 가입자에게 개인형퇴직연금제도의 계정등을 지정할 것을 신속히 안내하여야 한다.
+ ④ 제2항 및 제3항에도 불구하고 급여를 지급할 사유가 발생한 날부터 7일 이내에 가입자가 개인형퇴직연금제도의 계정등을 지정하지 아니하는 경우에는 법 제17조제5항에 따라 가입자 명의의 개인형퇴직연금제도 계정등으로 이전한다.
+ ⑤ 제1항에도 불구하고 영 제9조 각 호의 사유에 해당하는 경우에는 개인형퇴직연금제도의 계정등으로의 이전 이외의 방법으로 급여를 지급할 수 있다.
+
+제20조(급여의 지급절차) ① 사용자는 급여를 지급할 사유가 발생한 경우 제19조에 따른 개인형퇴직연금제도의 계정등으로 급여를 이전할 것을 운용관리기관에 지시하여야 한다.
+ ② 사용자는 제1항에 따라 급여의 지급을 지시할 때에는 가입자가 제출한 개인형퇴직연금제도 확인서를 첨부하여야 한다. 다만 제19조제4항의 경우에는 그러하지 아니하다.
+ ③ 사용자는 운용관리기관으로 하여금 급여의 지급사유 발생 사실 등을 자산관리기관에 전달하도록 하여 가입자의 개인형퇴직연금제도의 계정등으로 급여가 이전될 수 있도록 하여야 한다.
+ ④ 사용자는 가입자가 퇴직연금사업자에 직접 급여를 청구한 경우에는 퇴직연금사업자가 지체 없이 그 내용을 사용자에게 알리도록 하여 제1항에 따른 지급 지시가 이루어질 수 있도록 하여야 한다.
+ ⑤ 제1항에도 불구하고 사업의 도산 등으로 사용자를 통한 급여의 지급절차 진행이 곤란한 경우 가입자는 퇴직연금사업자에게 직접 급여를 청구할 수 있다.
+ ⑥ 가입자는 퇴직할 때에 받을 급여를 갈음하여 그 운용 중인 자산을 가입자가 설정한 개인형퇴직연금제도의 계정등으로 이전해 줄 것을 해당 퇴직연금사업자에게 요청할 수 있다.
+ ⑦ 제6항에 따른 가입자의 요청이 있는 경우 퇴직연금사업자는 그 운용 중인 자산을 가입자의 개인형퇴직연금제도의 계정등으로 이전하여야 한다.
+
+
+제6장 적립금의 운용
+
+제21조(적립금 운용방법 선정 및 운용지시) ① 가입자는 운용관리기관이 제시한 적립금 운용방법 중에서 스스로의 선택으로 운용방법을 선정할 수 있고, 반기 1회 이상 이를 변경할 수 있다.
+ ② 가입자는 제1항에 따라 적립금 운용방법을 선정하거나 변경하고자 하는 경우 운용관리기관이 정하는 절차 및 방법에 따라 운용지시를 하여야 한다.
+ ③ 사용자는 가입자가 적립금 운용방법을 변경하는 경우 중도해지이율 적용 또는 중도해지에 따른 수수료 등의 부담에 관한 구체적 내용을 운용관리기관으로 하여금 가입자에게 안내하도록 하여야 한다.
+
+제22조(적립금 운용방법 제시) ① 사용자는 운용관리기관으로 하여금 반기마다 1회 이상 위험과 수익구조가 서로 다른 세 가지 이상의 적립금 운용방법을 가입자에게 제시하도록 하여야 한다.
+ ② 사용자는 운용관리기관이 제1항에 따라 적립금의 운용방법을 제시함에 있어 다음 각 호의 요건을 갖춘 운용방법을 제시하도록 하여야 한다.
+  1. 운용방법에 관한 정보의 취득과 이해가 쉬울 것
+  2. 운용방법 간의 변경이 쉬울 것
+  3. 적립금 운용결과의 평가 방법과 절차가 투명할 것
+  4. 영 제25조제1항에 따른 원리금보장 운용방법이 하나 이상 포함될 것
+
+제23조(적립금 운용방법의 정보제공) ① 사용자는 운용관리기관으로 하여금 다음 각 호에서 정한 사항을 포함하여 가입자가 적립금 운용방법을 선정하는 데 필요한 정보를 제공하도록 하여야 한다.
+  1. 운용방법별 이익 및 손실의 가능성
+  2. 운용방법별 과거 3년간의 이익 또는 손실 관련 실적. 다만 해당 운용방법의 과거 취급기간이 3년에 미치지 못하는 경우에는 그 취급기간에 한한다.
+  3. 운용방법의 선정 또는 변경에 따라 발생하는 운용수탁보수, 중도해지 또는 환매수수료 등의 비용 및 그 부담 방법에 관한 사항
+  4. 예금자보호법에 의한 보호대상 등 지급보장의 정도
+  5. 그 밖에 가입자가 운용지시를 하는 데 필요한 정보
+ ② 사용자는 운용관리기관이 다음 각 호의 어느 하나에 해당하는 방법으로 적립금 운용방법에 관한 정보를 가입자에게 제공하도록 하여야 한다.
+  1. 우편 발송
+  2. 서면 교부
+  3. 정보통신망에 의한 전송
+ ③ 사용자는 운용관리기관으로 하여금 가입자에게 매 반기 1회 이상 정기적으로 제1항에 따른 적립금 운용방법에 관한 정보의 제공을 하도록 하여야 한다.
+
+제24조(사전지정운용방법의 선정) ① 가입자는 제21조에 따른 운용방법 선정과 별도로 운용관리기관이 [별지]에 따라 제시하는 사전지정운용방법 중 하나를 본인이 적용받을 사전지정운용방법으로 선정해야 한다.
+ ② 가입자는 제1항에서 선정한 사전지정운용방법을 변경할 수 있다.
+
+제24조의2(사전지정운용방법에 대한 정보제공) ① 사용자는 가입자가 제24조에 따른 사전지정운용방법을 선정할 수 있도록 운용관리기관으로 하여금 [별지]의 사전지정운용방법에 대하여 다음 각 호의 사항에 관한 정보를 제공하게 하여야 한다.
+  1. 해당 사전지정운용방법의 자산배분 현황 및 위험·수익 구조
+  2. 법 제21조의3제2항부터 제5항에 따른 사전지정운용제도의 운영에 대한 내용
+  3. 위험등급, 손실가능성 및 과거수익률
+  4. 수수료 등 가입자가 부담하는 비용에 관한 사항
+  5. 예금자 보호 한도 등 가입자의 보호에 관한 사항
+  6. 사전지정운용방법의 적용에 따른 퇴직연금자산의 위험도 변경 가능성
+  7. 법 제21조의3제6항에 따라 사전지정운용방법이 변경될 수 있다는 사실과 그 절차
+  8. 사전지정운용방법의 승인일자 등 승인에 관한 사항
+  9. 기타 고용노동부장관이 정하는 사항
+ ② 사용자는 운용관리기관이 제1항에 따른 정보를 서면 또는 정보통신망 등에 의한 방법으로 알릴 수 있도록 가입자에 관한 정보 제공에 협조해야 한다.
+
+제24조의3(사전지정운용방법 적용의 통지) 사용자는 제21조제1항에 따른 적립금 운용방법을 선정하지 않은 가입자가 다음 각 호에 해당하는 경우, 운용관리기관으로 하여금 제24조에 따라 가입자가 선정한 사전지정운용방법으로 적립금이 운용됨을 통지하도록 하여야 한다.
+  1. 가입자가 이 제도에 가입하고 사용자가 제13조에 따른 부담금을 최초로 납입한 때
+  2. 가입자가 제21조제1항에 따라 스스로 선정한 적립금 운용방법의 기간 만료일부터 4주가 지났을 때
+
+제24조의4(사전지정운용방법의 적용) ① 가입자가 제24조의3에 따른 통지를 받은 이후에도 별도의 운용지시 없이 2주가 경과한 경우 제24조제1항에 따라 본인이 선정한 사전지정운용방법으로 적립금이 운용된다.
+ ② 제1항에 따라 적립금을 운용하는 가입자는 언제든지 제21조에 따라 적립금 운용방법을 스스로 선정할 수 있다.
+
+제24조의5(사전지정운용방법의 변경) 사용자는 운용관리기관이 [별지]에 따른 사전지정운용방법 중 어느 하나에 대하여 고용노동부 장관으로부터 변경 승인을 받은 경우, 운용관리기관으로 하여금 변경 승인을 받은 날부터 7일 이내에 해당 사전지정운용방법을 본인이 적용받을 사전지정운용방법으로 선정하였거나 운용하고 있는 가입자에게 다음 각 호의 내용을 포함하여 통지하도록 해야 한다.
+  1. 사전지정운용방법 변경 사유
+  2. 변경되는 사전지정운용방법에 관한 정보로서 제24조의2제1항 각 호에 관한 사항
+  3. 사전지정운용방법 변경에 대한 고용노동부장관의 승인 사실
+  4. 가입자의 적립금이 변경된 사전지정운용방법으로 운용된다는 사실
+  5. 변경된 사전지정운용방법으로 운용된 이후 가입자는 언제든지 스스로 운용방법을 선정할 수 있다는 사실
+
+제24조의6(사전지정운용방법 취소) ① 사용자는 [별지]에 따른 사전지정운용방법이 고용노동부장관으로부터 승인 취소된 경우에는 운용관리기관으로 하여금 해당 사전지정운용방법을 본인이 적용받을 사전지정운용방법으로 선정하였거나 해당 사전지정운용방법으로 적립금이 운용되고 있는 가입자에게 다음 각 호의 사항을 통지하도록 해야 한다.
+  1. 승인 취소 사유
+  2. 승인 취소된 사전지정운용방법의 해지 방법·절차에 관한 사항
+  3. 다른 사전지정운용방법을 포함한 3가지 이상의 운용방법에 관한 정보로서 제24조의2 제1항 각 호에 관한 정보
+ ② 제1항의 조치에도 불구하고 가입자가 해당 사전지정운용방법을 해지하지 않거나 다른 운용방법을 선택하지 않을 경우 퇴직연금사업자로 하여금 가입자의 적립금을 같은 위험등급의 다른 사전지정운용방법으로 이전하여 운용할 수 있다는 사실을 통지하도록 해야 한다.
+ ③ 제2항에 따라 적립금을 운용하는 경우 퇴직연금사업자로 하여금 다음 각 호의 사항을 통지하도록 해야 한다.
+  1. 적립금을 이전하여 운용한다는 사실
+  2. 적립금을 이전한 운용방법에 관한 정보로서 제24조의2 각호에 관한 정보
+
+
+제7장 수급권 보호 및 중도인출
+
+제25조(수급권의 보호) ① 가입자는 이 제도의 급여를 받을 권리를 양도 또는 압류하거나 담보로 제공할 수 없다.
+ ② 제1항에도 불구하고 가입자는 다음 각 호의 어느 하나에 해당하는 사유와 요건을 갖춘 경우에는 이 제도의 급여를 받을 권리를 담보로 제공할 수 있다.
+  1. 무주택자인 가입자가 본인 명의로 주택을 구입하는 경우
+  2. 무주택자인 가입자가 주거를 목적으로 「민법」 제303조에 따른 전세금 또는 「주택임대차보호법」 제3조의2에 따른 보증금을 부담하는 경우. 이 경우 가입자가 하나의 사업 또는 사업장(이하 "사업"이라 한다)에 근로하는 동안 1회로 한정한다.
+  3. 가입자가 6개월 이상 요양을 필요로 하는 다음 각 목의 어느 하나에 해당하는 사람의 질병이나 부상에 대한 의료비(「소득세법 시행령」 제118조의5제1항 및 제2항에 따른 의료비를 말한다)를 부담하는 경우
+   가. 가입자 본인
+   나. 가입자의 배우자
+   다. 가입자 또는 그 배우자의 부양가족(「소득세법」 제50조제1항제3호에 따른 부양가족을 말한다. 이하 같다)
+  4. 담보를 제공하는 날부터 거꾸로 계산하여 5년 이내에 가입자가 「채무자 회생 및 파산에 관한 법률」에 따라 파산선고를 받은 경우
+  5. 담보를 제공하는 날부터 거꾸로 계산하여 5년 이내에 가입자가 「채무자 회생 및 파산에 관한 법률」에 따라 개인회생절차개시 결정을 받은 경우
+  6. 다음 각 목의 어느 하나에 해당하는 사람의 대학등록금, 혼례비 또는 장례비를 가입자가 부담하는 경우
+   가. 가입자 본인
+   나. 가입자의 배우자
+   다. 가입자 또는 그 배우자의 부양가족
+  7. 그 밖에 사업주의 휴업 실시로 근로자의 임금이 감소하거나 재난으로 피해를 입은 경우 등 고용노동부장관이 정하여 고시하는 사유와 요건에 해당하는 경우
+ ③ 제2항에 따른 담보제공의 한도는 다음 각 호의 구분에 따른다.
+  1. 제2항제1호부터 제6호까지의 경우: 가입자별 적립금의 100분의 50
+  2. 제2항제7호의 경우: 고용노동부장관이 정하여 고시하는 한도
+ ④ 사용자는 가입자가 대출을 받고자 하는 경우 퇴직연금사업자(자산관리기관)로부터 필요한 서류를 발급받을 수 있도록 하여야 한다.
+
+제26조(중도인출) ① 가입자는 다음 각 호의 어느 하나에 해당하는 사유가 발생하면 적립금을 중도인출할 수 있다.
+  1. 제25조제2항제1호, 제2호, 제7호(재난으로 피해를 입은 경우로 한정한다)에 해당하는 경우
+  2. 제25조제2항제3호에 해당하는 경우로서 가입자가 본인 연간 임금총액의 1천분의 125를 초과하여 의료비를 부담하는 경우
+  3. 중도인출을 신청한 날부터 거꾸로 계산하여 5년 이내에 가입자가 파산선고를 받은 경우
+  4. 중도인출을 신청한 날부터 거꾸로 계산하여 5년 이내에 가입자가 개인회생절차개시 결정을 받은 경우
+  5. 법 제7조제2항 후단에 따라 퇴직연금제도의 급여를 받을 권리를 담보로 제공하고 대출을 받은 가입자가 그 대출 원리금을 상환하기 위한 경우
+ ② 가입자는 중도인출을 받고자 하는 경우 제1항의 어느 하나에 해당하는 사유를 갖추었음을 증빙할 수 있는 자료를 첨부하여 퇴직연금사업자에게 중도인출을 신청하여야 한다.
+
+
+제8장 운용·자산관리업무 계약의 체결, 해지 및 이전
+
+제27조(운용관리업무에 관한 계약의 체결) ① 사용자는 법 제28조에 따라 다음 각 호의 업무(이하 "운용관리업무"라 한다)를 하는 것을 내용으로 하는 계약을 제6조에서 선정한 운용관리기관과 체결하여야 한다.
+  1. 가입자에 대한 적립금 운용방법 및 운용방법별 정보의 제공
+  1의2. 사전지정운용제도의 설정 및 운영에 관한 업무
+  2. 적립금 운용현황의 기록·보관·통지
+  3. 가입자가 선정한 운용방법을 자산관리기관에게 전달하는 업무
+  4. 그 밖에 운용관리업무의 적절한 수행을 위하여 필요한 업무
+ ② 사용자는 운용관리업무에 관한 계약을 체결 또는 변경하는 경우 그 내용을 가입자에게 알려야 한다.
+
+제28조(자산관리업무에 관한 계약의 체결) ① 사용자는 법 제29조에 따라 다음 각 호의 업무(이하 "자산관리업무"라 한다)를 하는 것을 내용으로 하는 계약을 제7조에서 선정한 자산관리기관과 체결하여야 한다.
+  1. 계좌의 설정 및 관리
+  2. 부담금의 수령
+  3. 적립금의 보관 및 관리
+  4. 운용관리기관이 전달하는 적립금 운용지시의 이행
+  5. 급여의 지급
+  6. 그 밖에 자산관리업무의 적절한 수행을 하는데 필요한 업무
+ ② 사용자는 제1항에 따른 계약을 체결하려는 경우에는 가입자를 피보험자 또는 수익자로 하여 영 제24조에서 정하는 요건을 갖춘 보험계약 또는 신탁계약의 방법으로 하여야 한다.
+ ③ 사용자는 자산관리업무에 관한 계약을 체결 또는 변경하는 경우 그 내용을 가입자에게 알려야 한다.
+
+제29조(수수료의 부담) ① 사용자 부담금에 대한 운용관리업무 및 자산관리업무 수수료는 사용자가 부담한다.
+ ② 가입자 추가 부담금에 대한 운용관리 및 자산관리업무 수수료는 가입자가 부담한다.
+ ③ 사용자는 제2항에 따른 수수료율 및 부담방법 등 그 구체적 사항을 퇴직연금사업자로 하여금 가입자에게 알리도록 하여야 한다.
+
+제30조(계약해지) 사용자는 다음 각 호의 어느 하나에 해당하는 경우에 제27조 및 제28조에 따른 계약을 해지할 수 있다.
+  1. 이 제도의 폐지
+  2. 퇴직연금사업자의 변경
+  3. 퇴직연금사업자의 계약 위반
+  4. 퇴직연금사업자의 등록취소 또는 등록말소
+
+제31조(계약이전) 사용자는 제30조제2호부터 제4호까지의 사유에 해당하는 경우 이 제도의 이전에 필요한 조치를 하여야 한다.
+
+
+제9장 제도의 폐지·중단
+
+제32조(제도의 폐지) ① 이 제도는 다음 각 호의 어느 하나에 해당하는 경우에 폐지할 수 있다.
+  1. 사업의 소멸·도산
+  2. 다른 퇴직급여제도로의 변경
+ ② 사용자는 제1항에 따라 이 제도를 폐지하는 경우 근로자대표의 동의를 받아야 한다.
+ ③ 사용자는 영 제38조제1호에 따라 폐지한 날부터 1개월 이내에 고용노동부장관에게 폐지신고서를 제출하여야 한다.
+ ④ 사용자는 이 제도 폐지일을 기준으로 산정된 가입자별 미납 부담금, 가입자별 급여 내역 및 지급절차, 중간정산 대상기간 등을 가입자에게 통지하여야 한다.
+ ⑤ 사용자는 제4항에 따른 통지를 함에 있어 미납 부담금이 있는 경우에는 그 금액과 지연이자를 포함한 금액, 납입 예정일 및 해소 방안도 함께 제시하여야 한다.
+ ⑥ 사용자는 이 제도 폐지일부터 14일 이내에 미납 부담금 및 지연이자를 퇴직연금사업자에게 납입한 후 퇴직연금사업자로 하여금 급여를 지급하도록 하는데 필요한 조치를 하여야 한다.
+
+제33조(제도 폐지 시 급여 처리) ① 제32조에 따라 가입자가 급여를 받은 경우에는 법 제8조제2항에 따라 중간정산되어 받은 것으로 본다.
+ ② 제1항에 따른 가입자별 중간정산 대상기간은 가입자별로 퇴직연금에 가입한 날부터 사용자가 납입한 부담금에 대응하는 기간의 마지막 날까지로 환산한다.
+ ③ 사용자는 이 제도의 폐지로 퇴직연금사업자로 하여금 가입자에게 급여를 지급하도록 하는 경우 제18조부터 제20조까지의 규정을 따른다.
+
+제34조(제도의 운영중단) ① 사용자가 법 또는 이 규약에 위반되는 행위를 하여 고용노동부장관이 이 제도의 중단을 명한 경우 이 제도의 운영을 중단하기로 한다.
+ ② 이 제도의 운영이 중단된 경우 중단된 기간에 대하여는 법 제8조제1항에 따른 퇴직금제도를 적용한다.
+ ③ 사용자는 이 제도의 중단에도 불구하고 기본적인 업무(가입자 통지, 교육, 급여 지급 등)는 유지하여야 한다.
+ ④ 사용자는 이 제도의 중단에도 불구하고 퇴직연금사업자로 하여금 기본적인 업무(급여 지급, 교육, 적립금 운용 등)를 유지하도록 하여야 한다.
+
+
+제10장 운용현황의 통지 및 가입자 교육
+
+제35조(운용현황의 통지) ① 사용자는 운용관리기관으로 하여금 가입자별 운용현황을 매년 1회 이상 가입자에게 통지하도록 하여야 한다. 이 경우 가입자별 적립금의 운용수익 및 운용방법별 구성비율 등의 내용이 포함되어야 한다.
+ ② 제1항에 따른 운용현황의 통지는 우편 발송, 서면 교부, 정보통신망에 의한 전송 등의 방법으로 이루어져야 한다.
+ ③ 사용자는 부담금이 1개월 이상 미납되거나 적립금 운용수익률이 현저히 변동한 경우 10일 이내에 가입자에게 알리도록 하여야 한다.
+
+제36조(가입자 교육) ① 사용자는 매년 1회 이상 가입자에게 이 제도의 운영상황 등 다음 각 목의 사항에 대하여 교육을 실시하여야 한다.
+  1. 제도 일반에 관한 교육사항
+   가. 급여 종류에 관한 사항, 수급요건, 급여액 등 제도별 특징 및 차이점
+   나. 담보대출, 중도인출, 지연이자 등 해당 사업의 퇴직연금제도 운영에 관한 사항
+   다. 급여 또는 부담금 산정의 기준이 되는 임금 등에 관한 사항
+   라. 퇴직 시 급여 지급절차 및 개인형퇴직연금제도로의 적립금 이전에 관한 사항
+   마. 연금소득세, 퇴직소득세 등 과세 체계에 관한 사항
+   바. 해당 사업의 퇴직연금제도를 중단하거나 폐지하는 경우 그 처리방법
+   사. 가입자의 소득, 자산, 부채, 나이 및 근속연수 등을 고려한 자산·부채관리의 일반적 원칙과 노후 설계의 중요성에 관한 사항
+  2. 이 제도의 설정에 따른 추가 교육사항
+   가. 매년 적립금액 및 운용수익률, 수수료 등 운용현황
+   나. 분산투자 등 안정적 운용을 위해 행하는 투자원칙
+   다. 운용방법별 이익, 손실의 가능성 및 수수료 등 비용 부담에 관한 사항
+   라. 사전지정운용방법에 관한 사항
+   마. 그 밖에 사용자가 추가로 교육이 필요하다고 인정한 사항
+ ② 제1항에 따른 교육의 방법 및 절차에 관한 사항은 다음 각 호의 구분에 따른다.
+  1. 제1항제1호의 제도 일반에 관한 교육사항은 사내 정보통신망 또는 사업장 게시판 게시 등을 가입자가 수시로 열람할 수 있도록 한다. 다만 이 제도 설정 후 최초 교육은 교육자료를 우편으로 발송하거나 직원연수·조회·회의·강의 등 대면하여 전달하는 방식으로 실시한다.
+  2. 제1항제2호의 이 제도의 설정에 따른 추가 교육사항은 다음 각 목 중 하나 이상의 방법으로 실시한다.
+   가. 서면 또는 전자우편 등을 통한 정기적인 교육자료의 발송
+   나. 직원연수·조회·회의·강의 등의 대면 교육의 실시
+   다. 정보통신망을 통한 온라인 교육의 실시
+   라. 해당 사업장 게시판 등에 상시 게시${d.educationDelegate!==false?`\n ③ 사용자는 퇴직연금사업자에게 제1항 및 제2항에 따른 교육의 실시를 위탁할 수 있다.\n ④ 제3항에 따라 퇴직연금사업자에게 가입자 교육의 실시를 위탁하는 경우 사용자는 퇴직연금사업자와 교육시기, 교육내용, 구체적 교육방법 등을 포함한 계약을 체결하여 퇴직연금사업자로 하여금 위탁계약의 내용에 따라 교육을 실시하도록 하여야 한다.\n ⑤ 사용자는 제3항 및 제4항에 따라 교육의 실시를 위탁한 경우 교육의 실시를 위하여 필요한 사항에 협조하고, 그 실시 결과를 확인하여야 한다.`:""}
+
+
+제11장 기타
+
+제37조(사업연도) 이 제도의 사업연도는 이 사업의 회계연도를 기준으로 하며, 회계 결산월은 ${h((d.fiscalMonth||"12")+"월")}로 한다.
+
+제38조(규약의 변경) ① 사용자는 이 규약의 내용을 변경하고자 하는 경우에는 근로자대표의 의견을 들어야 한다. 다만, 근로자에게 불리하게 변경하려는 경우에는 근로자대표의 동의를 받아야 한다.
+ ② 사용자는 제1항에 따른 규약의 변경 시 그 내용을 가입자에게 알려야 한다.
+ ③ 사용자는 규약이 변경된 경우 그 내용을 퇴직연금사업자에게 통지하여야 한다.
+
+제39조(법령 등의 준용) ① 이 규약에서 정하지 아니한 사항은 관련 법령 및 취업규칙 등에서 정한 바에 따른다.
+ ② 이 규약에서 정한 사항을 관련 법령에서 변경한 경우에는 그에 따르기로 한다.
+
+
+【부 칙 <${h(sf)}>】
+
+${d.regulationType==="change"?`제1조(시행일) 이 제도는 ${h(sf)}부터 변경하여 시행한다. 다만, 관련 법령 개정에 따른 변경사항은 개정법령 시행일부터 적용한다.`:`제1조(시행일) 이 제도는 ${h(sf)}부터 시행한다.`}${convArt}
+${app}`;
+}
+
+// ─── 규약 생성: DB형 ────────────────────────────────
+function generateDB(d) {
+  const allOps=[...(d.operationManagers||[]),...(d.operationManagersBanks||[]),...(d.operationManagersIns||[])];
+  const allAssets=[...(d.assetManagers||[]),...(d.assetManagersBanks||[]),...(d.assetManagersIns||[])];
+  const multi=allOps.length>1; const multiA=allAssets.length>1; const isSmall=Number(d.employeeCount)<300;
+  const sf=formatDate(d.startDate); const h=hl;
+  const lead=d.leadProvider||allOps[0]||"○○○○";
+  const ib=multi?"(운용관리기관이 복수인 경우 간사기관)":"";
+  const ct=d.coverageType;
+
+  let a9="";
+  if(ct==="all") a9=`제9조(가입대상) 이 제도의 가입대상은 이 사업에 소속된 모든 근로자로 한다.`;
+  else if(ct==="specific_group") a9=`제9조(가입대상) 이 제도의 가입대상은 이 사업에 소속된 ${h(d.specificGroup||"(     )")} 근로자로 한다.`;
+  else if(ct==="after_date") a9=`제9조(가입대상) 이 제도의 가입대상은 이 사업에 소속된 근로자 중 ${h(formatDate(d.cutoffDate))} 이후 입사한 자로 한다.`;
+  else a9=`제9조(가입대상) ① 이 제도의 가입대상은 이 사업에 소속된 근로자 중 이 제도 가입을 신청하는 자로 한다.`;
+  const excl1=!d.includeUnder1Year, excl15=!d.includeUnder15Hour;
+  let excl="";
+  if(excl1&&excl15) excl=" 다만 계속근로기간이 1년 미만인 근로자, 4주간을 평균하여 1주간의 소정근로시간이 15시간 미만인 근로자에 대하여는 그러하지 아니하다.";
+  else if(excl1) excl=" 다만 계속근로기간이 1년 미만인 근로자에 대하여는 그러하지 아니하다.";
+  else if(excl15) excl=" 다만 4주간을 평균하여 1주간의 소정근로시간이 15시간 미만인 근로자에 대하여는 그러하지 아니하다.";
+  a9+=excl;
+  if(d.includeExecutives) a9+=` 이 제도의 가입대상에는 사용자와 사용종속 관계에서 근로를 제공하고 임금을 받는 임원(등기이사 포함)을 포함한다.`;
+
+  let a11=`제11조(가입기간) 이 제도의 설정일 이후 가입자가 이 사업에서 근로를 제공한 날부터 제10조제2항 각 호별 자격 상실의 사유가 발생한 날까지를 가입기간으로 한다.`;
+  if(d.retroactive==="full") a11=`제11조(가입기간) ① 이 제도의 설정일 이후 가입자가 이 사업에서 근로를 제공한 날부터 제10조제2항 각 호별 자격 상실의 사유가 발생한 날까지를 가입기간으로 한다.\n ② 제1항에도 불구하고 이 제도의 설정 이전에 이 사업에서 근로를 제공한 기간(이하 "과거근로기간"이라 한다)이 있는 가입자에 대하여는 과거근로기간을 가입기간에 포함한다. 이 경우 법 제8조제2항에 따라 퇴직금을 미리 정산한 기간은 제외한다.`;
+  else if(d.retroactive==="partial") a11=`제11조(가입기간) ① 이 제도의 설정일 이후 가입자가 이 사업에서 근로를 제공한 날부터 제10조제2항 각 호별 자격 상실의 사유가 발생한 날까지를 가입기간으로 한다.\n ② 제1항에도 불구하고 이 제도의 설정 이전에 이 사업에서 근로를 제공한 기간(이하 "과거근로기간"이라 한다)이 있는 가입자에 대하여는 ${h(formatDate(d.retroDate))} 이후 과거근로기간을 가입기간에 포함한다.`;
+
+  const opsD=multi?`[별지]와 같이 선정한다.`:`다음과 같이 선정한다.\n\n    명칭: ${h(allOps[0]||"○○○○")}`;
+  const assD=multiA?`[별지]와 같이 선정한다.`:`다음과 같이 선정한다.\n\n    명칭: ${h(allAssets[0]||"○○○○")}`;
+  const a8_2=isSmall?"":`\n ② 사용자가 제6조 또는 제7조에 따른 퇴직연금사업자를 선정하거나 변경한 사유 등은 [별지]와 같다.`;
+  let leadC=""; if(multi) leadC=`\n ③ 사용자는 제1항에 따른 운용관리기관 중 ${h(lead)}을 대표 퇴직연금사업자(이하 "간사기관"이라 한다)로 정한다.\n ④ 사용자는 간사기관을 선정하거나 변경한 경우 그 사실을 선정일 또는 변경일부터 7일 이내에 모든 운용관리기관에게 알려야 한다.`;
+  let wpC=""; if(d.wagepeakProtection) wpC=`\n ③ 제1항에도 불구하고 법 제32조제5항 각 호에 따른 사유로 가입자의 퇴직급여가 감소할 수 있는 경우, 각 산정기간별 계속근로기간 1년에 대하여 30일분의 평균임금에 상당하는 금액을 각각 구한 후 합산한 금액을 이 제도의 급여수준으로 한다.\n ④ 제3항에도 불구하고 제3항에 따라 합산한 금액이 제1항의 급여수준에 미치지 못하는 경우에는 제1항에 따른 급여수준으로 한다.`;
+  let convC="";
+  if(d.allowConversion){
+    const nums="①②③④⑤⑥⑦⑧⑨⑩";
+    let details="";
+    if(d.conversionDetails&&d.conversionDetails.trim()){
+      const lines=d.conversionDetails.trim().split("\n").filter(l=>l.trim());
+      details=lines.map((l,i)=>` ${nums[i+1]} ${h(l.trim())}`).join("\n");
+    } else {
+      details=` ② 제1항에 따른 제도전환 절차 등 구체적 사항은 사용자가 별도로 정한다.`;
+    }
+    convC=`\n제2조(제도의 전환) ① 사용자는 가입자에게 법 제32조제5항 각 호의 어느 하나에 해당하는 사유가 발생할 경우 확정기여형퇴직연금제도로 전환할 수 있는 기회를 부여하여야 한다.\n${details}`;
+  }
+
+  let app="";
+  if(multi){app+=`\n\n[별지] 이 제도의 운용관리기관 (제6조 관련)\n\n`;allOps.forEach((o,i)=>{app+=`    ${i+1}. ${h(o)}\n`;});}
+  if(multiA){app+=`\n\n[별지] 이 제도의 자산관리기관 (제7조 관련)\n\n`;allAssets.forEach((o,i)=>{app+=`    ${i+1}. ${h(o)}\n`;});}
+  if(!isSmall){
+    const qe=(d.quantEval||["재무안정성","자산운용실적","고객만족도"]).map(h).join(", ");
+    const ql=(d.qualEval||["제도운용역량","자산운용역량","서비스제공역량"]).map(h).join(", ");
+    const wp=d.workerRepParticipated===true?h("☑ 참여   □ 불참"):d.workerRepParticipated===false?h("□ 참여   ☑ 불참"):"□ 참여   □ 불참";
+    app+=`\n\n[별지] 퇴직연금사업자 선정(변경) 사유서 (제8조 관련)\n\n`;
+    app+=`  1. 퇴직연금사업자 선정(변경) 절차\n     근로자대표와 성실한 협의를 바탕으로 사업자 입찰경쟁 제안공고 후\n     입찰 참여기관 대상 공정한 정량/정성 평가 실시\n\n`;
+    app+=`  2. 평가기준 및 방법\n     [정량평가] ${qe}\n     [정성평가] ${ql}\n\n`;
+    app+=`  3. 선정결과\n     운용관리기관: ${allOps.map(h).join(", ")}\n     자산관리기관: ${allAssets.map(h).join(", ")}\n     선정 사유: ${h(d.selectionReason||"(선정 사유 입력 필요)")}\n\n`;
+    app+=`  4. 근로자대표 참여여부: ${wp}\n`;
+  }
+
+  return `확정급여형퇴직연금제도규약
+
+${h(d.companyName||"(주)○○○○")}
+
+
+제1장 총 칙
+
+제1조(명칭) 이 규약은 ${h(d.companyName||"(주)○○○○")}의 확정급여형퇴직연금제도규약이라 한다.
+
+제2조(목적) 이 규약은 「근로자퇴직급여 보장법」(이하 "법"이라 한다) 제13조에 따라 확정급여형퇴직연금제도의 설정 및 운영에 관한 사항을 정함으로써 이 제도 가입자의 안정적인 노후생활 보장에 이바지함을 목적으로 한다.
+
+제3조(정의) 이 규약에서 사용하는 용어의 뜻은 다음과 같다.
+  1. "사용자"란 법 제2조제2호의 규정에 따른 사용자를 말한다.
+  2. "근로자대표"란 법 제4조제3항의 규정에 따른 근로자대표를 말한다.
+  3. 그 밖의 용어의 뜻은 법에서 정한 바에 따른다.
+
+제4조(적용) 이 규약은 다음의 사업 또는 사업장(이하 "사업"이라 한다) 전체에 적용한다.
+    명칭: ${h(d.companyName||"(주)○○○○")}
+    주소: ${h(d.address||"○○시 ○○구 ○○로 ○○번지")}
+
+제5조(성실의무) 사용자 및 근로자는 이 규약과 관련 법령에서 정한 퇴직연금제도의 설정 및 운영에 관한 사항을 성실히 준수하여야 한다.
+
+
+제2장 퇴직연금사업자의 선정
+
+제6조(운용관리기관의 선정 및 변경) ① 사용자는 법 제28조에 따른 운용관리업무를 수행할 퇴직연금사업자(이하 "운용관리기관"이라 한다)를 ${opsD}
+ ② 사용자는 제1항의 운용관리기관을 변경(삭제, 추가를 포함)하고자 하는 경우 근로자대표의 의견을 들어야 한다.${leadC}
+
+제7조(자산관리기관의 선정 및 변경) ① 사용자는 법 제29조에 따른 자산관리업무를 수행할 퇴직연금사업자(이하 "자산관리기관"이라 한다)를 ${assD}
+ ② 사용자는 제1항의 자산관리기관을 변경(삭제, 추가를 포함)하고자 하는 경우 근로자대표의 의견을 들어야 한다.
+
+제8조(운용·자산관리기관 선정·변경 시 사용자 책무) ① 사용자는 제6조 및 제7조에 따른 운용·자산관리기관을 선정·변경하는 경우, 관련 서비스 제공 등 퇴직연금제도 전반에 대한 능력과 전문성을 종합적으로 판단하여 정하여야 한다.${a8_2}
+
+
+제3장 가입자 및 가입기간
+
+${a9}
+
+제10조(가입자 자격 취득 및 상실) ① 이 제도 설정 이후 가입대상이 되는 날을 가입자 자격 취득일로 본다.
+ ② 다음 각 호에 해당하게 되는 날의 다음날을 가입자 자격 상실일로 본다.
+  1. 가입자가 사망한 때
+  2. 퇴직, 해고, 그 밖에 취업규칙 또는 별도로 정하는 규정에 따른 사유로 고용관계가 종료된 때
+  3. 이 제도를 폐지한 때
+  4. 제9조의 규정에 따른 가입대상 요건에 해당하지 아니한 때
+ ③ 사용자는 가입자의 자격 취득 또는 상실 사유가 발생한 경우 그 사실을 운용관리기관${ib}에 전달하여 가입자 등재 및 상실 등의 업무처리가 이뤄지도록 하여야 한다.
+
+${a11}
+
+
+제4장 급 여
+
+제12조(급여수준) ① 이 제도에 따른 급여수준은 가입자의 퇴직일을 기준으로 산정한 일시금이 계속근로기간 1년에 대하여 30일분의 평균임금에 상당하는 금액이 되도록 한다.
+ ② 제1항의 평균임금은 근로기준법령에서 정해진 바에 따라 계산한다.${wpC}
+
+제13조(급여의 종류 및 수급요건) 이 제도에 따른 급여의 종류는 연금 또는 일시금으로 하되, 수급요건은 다음 각 호와 같다.
+  1. 연금은 55세 이상으로서 가입기간이 10년 이상인 가입자에게 지급할 것. 이 경우 연금의 지급기간은 5년 이상이어야 한다.
+  2. 일시금은 연금수급 요건을 갖추지 못하거나 일시금 수급을 원하는 가입자에게 지급할 것
+
+제14조(급여의 지급사유 발생) 급여의 지급사유는 이 제도의 가입자가 제10조제2항제1호부터 제3호까지의 어느 하나에 해당되어 가입자 자격을 상실하게 된 경우 발생한다.${d.excludeUnder1YearBenefit?" 다만 계속근로기간 1년 미만인 가입자가 그 자격을 상실한 경우에는 그러하지 아니한다.":""}
+
+제15조(급여의 지급기한 등) ① 사용자는 급여를 지급할 사유가 발생한 날부터 14일 이내에 퇴직연금사업자로 하여금 적립금의 범위에서 급여지급의무가 있는 급여 전액을 지급하도록 하여야 한다.
+ ② 사용자는 제1항에도 불구하고 퇴직연금제도 적립금으로 투자된 운용자산 매각이 단기간에 이루어지지 아니하는 등 특별한 사정이 있는 경우에는 가입자 및 퇴직연금사업자와 합의하여 지급기일을 연장할 수 있다.
+ ③ 사용자는 제1항에도 불구하고 「근로자퇴직급여 보장법 시행령」(이하 "영"이라 한다) 제8조 각 호의 사유에 해당하는 경우 퇴직연금사업자로 하여금 법 제16조제1항제2호에 따른 금액에 대한 적립금의 비율에 해당하는 금액을 지급하도록 하여야 한다.
+ ④ 사용자는 제3항에 따라 퇴직연금사업자가 지급하는 급여수준이 제12조에 따른 급여수준에 미치지 못할 때에는 급여를 지급할 사유가 발생한 날부터 14일 이내에 그 부족한 금액을 해당 근로자에게 지급하여야 한다.
+
+제16조(급여의 지급) ① 사용자가 제15조제1항 및 제4항에 따른 급여를 지급하는 경우 가입자가 지정한 개인형퇴직연금제도의 계정등으로 이전하는 방법으로 한다.
+ ② 가입자는 이 제도 가입 이후 7일 이내에 제1항에 따른 급여를 이전받기 위한 개인형퇴직연금제도의 계정등을 설정하고 그 확인자료를 사용자에게 제출하는 등의 방법으로 지정의 의사를 표시하여야 한다.
+ ③ 제14조에 따른 급여의 지급사유가 발생할 예정이거나 발생했음에도 불구하고 가입자가 개인형퇴직연금제도의 계정등을 지정하지 아니한 경우, 사용자는 제1항에 따라 급여가 이전될 수 있도록 가입자에게 개인형퇴직연금제도의 계정등을 지정할 것을 신속히 안내하여야 한다.
+ ④ 제2항 및 제3항에도 불구하고 급여를 지급할 사유가 발생한 날부터 7일 이내에 가입자가 개인형퇴직연금제도의 계정등을 지정하지 아니하는 경우에는 법 제17조제5항에 따라 가입자 명의의 개인형퇴직연금제도의 계정으로 이전한다.
+ ⑤ 제4항에 따른 "해당 퇴직연금사업자"란 ${multiA?`자산관리업무에 관한 계약을 체결한 복수의 퇴직연금사업자 중 사용자가 지정하는 퇴직연금사업자를 말한다.`:`하나의 퇴직연금사업자와 자산관리업무에 관한 계약을 체결한 경우에는 그 사업자를 말한다.`}
+ ⑥ 제1항에도 불구하고 영 제9조 각 호의 사유에 해당하는 경우에는 개인형퇴직연금제도의 계정등으로의 이전 외의 방법으로 급여를 지급할 수 있다.
+
+제17조(급여의 지급절차) ① 사용자는 급여를 지급할 사유가 발생한 경우 제16조에 따른 개인형퇴직연금제도의 계정등으로 급여를 이전할 것을 운용관리기관${ib}에 지시하여야 한다.
+ ② 사용자는 제1항에 따라 급여의 지급을 지시할 때에는 가입자가 제출한 개인형퇴직연금제도 확인서를 첨부하여야 한다. 다만 제16조제4항의 경우에는 그러하지 아니하다.
+ ③ 사용자는 운용관리기관${ib}으로 하여금 급여의 지급사유 발생 사실 등을 자산관리기관에 전달하도록 하여 가입자의 개인형퇴직연금제도 계정등으로 급여가 이전될 수 있도록 하여야 한다.${multi?`\n ④ 사용자는 운용관리기관이 복수인 경우 간사기관이 다른 운용관리기관에도 급여의 지급사유 발생 사실 등을 전달하도록 하여 필요한 업무 협조가 이루어질 수 있도록 하여야 한다.`:""}
+ ${multi?"⑤":"④"} 제1항에도 불구하고 사업의 도산 등으로 사용자를 통한 급여의 지급절차 진행이 곤란한 경우 가입자는 퇴직연금사업자에게 직접 급여를 청구할 수 있다.
+ ${multi?"⑥":"⑤"} 사용자는 가입자가 자산관리기관에 직접 급여를 청구한 경우에는 자산관리기관이 지체 없이 그 내용을 사용자에게 알리도록 하여 제1항에 따른 지급 지시가 이루어질 수 있도록 하여야 한다.
+
+
+제5장 급여 지급능력의 확보
+
+제18조(부담금의 산정 및 납입) ① 사용자는 이 제도의 가입자에게 제12조에서 정한 급여수준에 따른 급여를 지급하기 위해 매년 1회 이상 정기적으로 부담금을 납입하여야 한다.
+ ② 제1항에 따른 부담금은 자산관리기관에 매년 ${h((d.contribMonth||"12")+"월 "+(d.contribDay||"31")+"일")}까지 납입한다.
+ ③ 사용자는 재정균형을 장기적으로 유지할 수 있도록 운용관리업무를 수행하는 퇴직연금사업자${multi?"(복수인 경우 간사기관)":""}에게 관련 법령의 산정방식에 따라 부담금을 적정하게 산출하여 줄 것을 요청하여야 한다.
+ ④ 사용자는 제3항에 따른 부담금을 산출하는데 필요한 단체협약, 취업규칙, 급여명세서, 근로계약서 등의 자료를 퇴직연금사업자에게 제공하여야 한다.
+
+제19조(급여 지급능력 확보) ① 사용자는 급여 지급능력을 확보하기 위하여 매 사업연도 말 법 제16조제1항 본문에 따른 기준책임준비금에 100분의 100을 곱하여 산출한 금액(이하 "최소적립금"이라 한다) 이상을 적립금으로 적립하여야 한다.${d.retroactive!=="none"?`\n ② 제1항에도 불구하고 과거근로기간을 가입기간에 포함한 경우에는 법 제16조제1항 단서에 따라 기준책임준비금에 고용노동부 고시로 정한 비율을 곱하여 산출한 금액 이상을 적립금으로 적립하여야 한다.`:""}
+ ${d.retroactive!=="none"?"③":"②"} 사용자는 운용관리기관${ib}이 매 사업연도 종료 후 6개월 이내에 영 제6조에 따른 재정검증을 실시할 수 있도록 하여야 한다.
+ ${d.retroactive!=="none"?"④":"③"} 사용자는 ${d.retroactive!=="none"?"제3항":"제2항"}에 따른 재정검증을 하는데 필요한 자료를 사업연도 종료 후 3개월 이내에 운용관리기관${ib}에게 제공하여야 한다.
+
+제20조(재정검증결과 통보 협조) 영 제6조에 따른 재정검증 결과 적립금이 최소적립금보다 적은 경우 퇴직연금사업자가 전체근로자에게 그 결과를 서면 또는 정보통신망에 의한 방법으로 알리기 위하여 사용자에게 다음 각 호의 사항을 협조 요청하는 경우 사용자는 특별한 사유가 없는 한 협조하여야 한다.
+  1. 사용자가 운영하는 사내 전산망에 대한 이용 제공
+  2. 전체 근로자의 주소 또는 전자우편 주소의 제공
+  3. 사용자에게 서면 또는 정보통신망을 활용하여 전체 근로자를 대상으로 재정검증결과를 통보하는 행위의 수행
+
+제21조(적립 부족의 해소) 사용자는 영 제6조에 따른 재정검증 결과 적립금이 최소적립금의 95%에 미치지 못하는 것으로 확인된 경우 다음 각 호의 조치를 하여야 한다.
+  1. 사용자는 부담금 납입 등을 통해 최소적립금 대비 부족분 비율의 3분의 1 이상을 직전 사업연도 종료 후 1년 이내에 해소하여야 한다.
+  2. 사용자는 제1호의 조치를 이행하기 위한 자금 조달방안, 납입 계획 등의 내용을 포함한 계획서(이하 "재정안정화계획서"라 한다)를 구체적으로 작성하여 3년간 보존하여야 한다.
+  3. 사용자는 영 제6조에 따라 퇴직연금사업자로부터 재정검증 결과를 통보받은 날부터 60일 이내에 근로자대표 또는 전체 근로자에게 재정안정화계획서를 통보하여야 한다.
+
+
+제6장 운용·자산관리업무 계약의 체결, 해지 및 이전
+
+제22조(운용관리업무에 관한 계약의 체결) ① 사용자는 법 제28조에 따라 다음 각 호의 업무(이하 "운용관리업무"라 한다)를 하는 것을 내용으로 하는 계약을 제6조에서 선정한 운용관리기관과 체결하여야 한다.
+  1. 사용자에 대한 적립금 운용방법 및 운용방법별 정보의 제공
+  2. 연금제도 설계 및 연금 회계처리
+  3. 적립금 운용현황의 기록·보관·통지
+  4. 사용자가 선정한 운용방법을 자산관리기관에게 전달하는 업무
+  5. 가입자 교육을 위탁하고자 하는 경우 위탁받은 교육의 실시
+  6. 그 밖에 운용관리업무의 적절한 수행을 위하여 필요한 업무${multi?`\n ② 제1항에도 불구하고 운용관리기관이 복수인 경우에는 다음 각 호의 업무를 수행하는 것을 내용으로 하는 계약을 간사기관과 체결하여야 한다.\n  1. 법 제16조에 따른 급여 지급능력 확보 여부의 확인 및 그 결과의 통보\n  2. 영 제4조제1항제1호에 따른 부담금의 산정\n  3. 퇴직 등 사유가 발생한 경우 급여를 지급할 퇴직연금사업자의 선정에 관한 사항\n  4. 그 밖에 신규 가입자의 등재, 적립금액 및 운용현황의 통지 등 제도의 안정적·통일적 운용을 위하여 필요한 사항`:""}
+ ${multi?"③":"②"} 사용자는 운용관리업무에 관한 계약을 체결 또는 변경하는 경우 그 내용을 가입자에게 알려야 한다.
+
+제23조(자산관리업무에 관한 계약의 체결) ① 사용자는 법 제29조에 따라 다음 각 호의 업무(이하 "자산관리업무"라 한다)를 하는 것을 내용으로 하는 계약을 제7조에서 선정한 자산관리기관과 체결하여야 한다.
+  1. 계좌의 설정 및 관리
+  2. 부담금의 수령
+  3. 적립금의 보관 및 관리
+  4. 운용관리기관이 전달하는 적립금 운용지시의 이행
+  5. 급여의 지급
+  6. 그 밖에 자산관리업무의 적절한 수행을 하는데 필요한 업무
+ ② 사용자는 제1항에 따른 계약을 체결하려는 경우에는 가입자를 피보험자 또는 수익자로 하여 영 제24조에서 정하는 요건을 갖춘 보험계약 또는 신탁계약의 방법으로 하여야 한다.
+ ③ 사용자는 자산관리업무에 관한 계약을 체결 또는 변경하는 경우 그 내용을 가입자에게 알려야 한다.
+
+제24조(수수료의 부담) 제22조 및 제23조에 따른 운용관리업무 및 자산관리업무의 수행에 대한 수수료는 사용자가 부담한다.
+
+제25조(계약해지) 사용자는 다음 각 호의 어느 하나에 해당하는 경우에 제22조 및 제23조에 따른 계약을 해지할 수 있다.
+  1. 이 제도의 폐지
+  2. 퇴직연금사업자의 변경
+  3. 퇴직연금사업자의 계약 위반
+  4. 퇴직연금사업자의 등록취소 또는 등록말소
+
+제26조(계약이전) 사용자는 제25조제2호부터 제4호까지의 사유 중 어느 하나에 해당하는 경우 이 제도의 이전에 필요한 조치를 하여야 한다.
+
+
+제7장 제도의 폐지·중단
+
+제27조(제도의 폐지) ① 이 제도는 다음 각 호의 어느 하나에 해당하는 경우에 폐지할 수 있다.
+  1. 사업의 폐업·소멸·도산
+  2. 퇴직금제도로의 환원
+  3. 퇴직금제도를 제외한 다른 퇴직급여제도로의 변경
+ ② 사용자는 제1항에 따라 이 제도를 폐지하고자 하는 경우 근로자대표의 동의를 받아야 한다.
+ ③ 사용자는 영 제38조제1호에 따라 폐지한 날부터 1개월 이내에 고용노동부장관에게 폐지신고서를 제출하여야 한다.
+ ④ 사용자는 제1항제1호 및 제2호에 따라 이 제도가 폐지되는 경우 이 제도 폐지일을 기준으로 산정된 적립금, 적립 부족액, 가입자별 급여 내역 및 지급절차, 중간정산 대상기간 등을 가입자에게 통지하여야 한다.
+ ⑤ 사용자는 제1항제1호 및 제2호에 따라 이 제도가 폐지되는 경우 이 제도 폐지일부터 14일 이내에 퇴직연금사업자가 적립금으로 급여를 지급하도록 하는데 필요한 조치를 하여야 한다.
+
+제28조(제도 폐지 시 급여 처리) ① 제27조제1항제1호 및 제2호에 따라 가입자가 급여를 받은 경우에는 법 제8조제2항에 따라 중간정산되어 받은 것으로 본다.
+ ② 제1항에 따른 가입자별 중간정산금은 이 제도에 따라 적립된 금액을 가입자별 근속기간·평균임금과 제12조에 따른 급여수준을 고려하여 안분·산정하고, 중간정산 대상기간은 중간정산금을 기준으로 환산한다.
+ ③ 사용자는 이 제도의 폐지로 퇴직연금사업자로 하여금 가입자에게 급여를 지급하도록 하는 경우 제15조부터 제17조까지의 규정을 따른다.
+
+제29조(제도의 운영중단) ① 사용자가 법 또는 이 규약에 위반되는 행위를 하여 고용노동부장관이 이 제도의 중단을 명한 경우 이 제도의 운영을 중단하기로 한다.
+ ② 이 제도의 운영이 중단된 경우 중단된 기간에 대하여는 법 제8조제1항에 따른 퇴직금제도를 적용한다.
+ ③ 사용자는 이 제도의 중단에도 불구하고 다음 각 호의 기본적인 업무는 유지하여야 한다.
+  1. 가입자에게 제도 중단 사유 및 중단일, 재개시 일정, 미납 부담금이 있는 경우 그 납입계획 등 제도 중단기간의 처리방안 등의 공지
+  2. 가입자 교육의 실시
+  3. 급여 지급의 요청, 적립금 운용 등과 관련하여 법령 등에 규정된 업무의 이행을 위해 필요한 조치
+  4. 그 밖에 이 제도의 연속성 유지 및 가입자 보호를 위하여 필요한 업무
+ ④ 사용자는 이 제도의 중단에도 불구하고 퇴직연금사업자로 하여금 다음 각 호의 기본적인 업무를 유지하도록 하여야 한다.
+  1. 가입자 퇴직 등에 따른 급여의 지급
+  2. 가입자 교육을 위탁받은 경우 위탁받은 교육의 실시
+  3. 급여의 지급, 적립금의 운용, 운용현황의 통지 등과 관련하여 법령 및 운용·자산관리업무의 계약에서 정해진 업무
+  4. 그 밖의 이 제도의 연속성 유지 및 가입자 보호를 위하여 필요한 업무
+
+
+제8장 운용현황의 통지 및 가입자 교육
+
+제30조(운용현황의 통지) ① 사용자는 운용관리기관으로 하여금 이 제도의 적립금액 및 운용수익률 등의 운용현황을 매년 1회 이상 가입자에게 통지하도록 하여야 한다.
+ ② 제1항에 따른 운용현황의 통지는 다음 각 호의 어느 하나에 해당하는 방법으로 이루어져야 한다.
+  1. 우편 발송
+  2. 서면 교부
+  3. 정보통신망에 의한 전송
+  4. 그 밖에 이에 준하는 방식으로 사용자와 운용관리기관이 체결한 운용관리업무에 관한 계약에서 정한 방법
+
+제31조(가입자 교육) ① 사용자는 매년 1회 이상 가입자에게 이 제도의 운영상황 등 다음 각 목의 사항에 대하여 교육을 실시하여야 한다.
+  1. 제도 일반에 관한 교육사항
+   가. 급여 종류에 관한 사항, 수급요건, 급여액 등 제도별 특징 및 차이점
+   나. 담보대출, 지연이자 등 해당 사업의 퇴직연금제도 운영에 관한 사항
+   다. 급여 또는 부담금 산정의 기준이 되는 임금 등에 관한 사항
+   라. 퇴직 시 급여 지급절차 및 개인형퇴직연금제도로의 적립금 이전에 관한 사항
+   마. 연금소득세, 퇴직소득세 등 과세 체계에 관한 사항
+   바. 해당 사업의 퇴직연금제도를 중단하거나 폐지하는 경우 그 처리방법
+   사. 가입자의 소득, 자산, 부채, 나이 및 근속연수 등을 고려한 자산·부채관리의 일반적 원칙과 노후 설계의 중요성에 관한 사항
+  2. 이 제도의 설정에 따른 추가 교육사항
+   가. 최근 3년간의 부담금 납입현황
+   나. 급여종류별 표준적인 급여액 수준
+   다. 직전 사업연도 말 기준 최소적립금 대비 적립금 현황
+   라. 재정안정화계획서를 작성하는 경우 그 계획서의 내용 및 이행 상황
+   마. 그 밖에 적립금 운용현황, 운용목표 등에 관한 사항
+ ② 제1항에 따른 교육의 방법 및 절차에 관한 사항은 다음 각 호의 구분에 따른다.
+  1. 제1항제1호의 제도 일반에 관한 교육사항은 사내 정보통신망 또는 사업장 게시판 게시 등을 가입자가 수시로 열람할 수 있도록 한다. 다만 이 제도 설정 후 최초 교육은 교육자료를 우편으로 발송하거나 직원연수·조회·회의·강의 등 대면하여 전달하는 방식으로 실시한다.
+  2. 제1항제2호의 이 제도의 설정에 따른 추가 교육사항은 다음 각 목 중 하나 이상의 방법으로 실시한다.
+   가. 서면 또는 전자우편 등을 통한 정기적인 교육자료의 발송
+   나. 직원연수·조회·회의·강의 등의 대면 교육의 실시
+   다. 정보통신망을 통한 온라인 교육의 실시
+   라. 해당 사업장 게시판 등에 상시 게시${d.educationDelegate!==false?`\n ③ 사용자는 퇴직연금사업자에게 제1항 및 제2항에 따른 교육의 실시를 위탁할 수 있다.\n ④ 제3항에 따라 퇴직연금사업자에게 가입자 교육의 실시를 위탁하는 경우 사용자는 퇴직연금사업자와 교육시기, 교육내용, 구체적 교육방법 등을 포함한 계약을 체결하여 퇴직연금사업자로 하여금 위탁계약의 내용에 따라 교육을 실시하도록 하여야 한다.\n ⑤ 사용자는 제3항 및 제4항에 따라 교육의 실시를 위탁한 경우 교육의 실시를 위하여 필요한 사항에 협조하고, 그 실시 결과를 확인하여야 한다.`:""}
+
+
+제9장 기타
+
+제32조(수급권의 보호) ① 가입자는 이 제도의 급여를 받을 권리를 양도 또는 압류하거나 담보로 제공할 수 없다.
+ ② 제1항에도 불구하고 가입자는 다음 각 호의 어느 하나에 해당하는 사유와 요건을 갖춘 경우에는 이 제도의 급여를 받을 권리를 담보로 제공할 수 있다.
+  1. 무주택자인 가입자가 본인 명의로 주택을 구입하는 경우
+  2. 무주택자인 가입자가 주거를 목적으로 「민법」 제303조에 따른 전세금 또는 「주택임대차보호법」 제3조의2에 따른 보증금을 부담하는 경우. 이 경우 가입자가 하나의 사업 또는 사업장(이하 "사업"이라 한다)에 근로하는 동안 1회로 한정한다.
+  3. 가입자가 6개월 이상 요양을 필요로 하는 다음 각 목의 어느 하나에 해당하는 사람의 질병이나 부상에 대한 의료비(「소득세법 시행령」 제118조의5제1항 및 제2항에 따른 의료비를 말한다)를 부담하는 경우
+   가. 가입자 본인
+   나. 가입자의 배우자
+   다. 가입자 또는 그 배우자의 부양가족(「소득세법」 제50조제1항제3호에 따른 부양가족을 말한다. 이하 같다)
+  4. 담보를 제공하는 날부터 거꾸로 계산하여 5년 이내에 가입자가 「채무자 회생 및 파산에 관한 법률」에 따라 파산선고를 받은 경우
+  5. 담보를 제공하는 날부터 거꾸로 계산하여 5년 이내에 가입자가 「채무자 회생 및 파산에 관한 법률」에 따라 개인회생절차개시 결정을 받은 경우
+  6. 다음 각 목의 어느 하나에 해당하는 사람의 대학등록금, 혼례비 또는 장례비를 가입자가 부담하는 경우
+   가. 가입자 본인
+   나. 가입자의 배우자
+   다. 가입자 또는 그 배우자의 부양가족
+  7. 그 밖에 천재지변 등으로 피해를 입는 등 고용노동부장관이 정하여 고시하는 사유와 요건에 해당하는 경우
+ ③ 제2항에 따른 담보제공의 한도는 다음 각 호의 구분에 따른다.
+  1. 제2항제1호부터 제6호까지의 경우: 가입자별 적립금의 100분의 50
+  2. 제2항제7호의 경우: 고용노동부장관이 정하여 고시하는 한도
+ ④ 사용자는 가입자가 대출을 받고자 하는 경우 퇴직연금사업자(자산관리기관)로부터 필요한 서류를 발급받을 수 있도록 하여야 한다.
+
+${isSmall?"":`제33조(적립금운용위원회) ① 사용자는 퇴직연금제도 적립금의 합리적인 운용을 위하여 적립금운용위원회를 구성하여야 한다.
+ ② 사용자는 영 제9조의2에 따라 적립금운용위원회를 구성하되, 적립금이 최소적립금에 미치지 못하는 경우에는 영 제9조의2제3항제1호부터 제3호까지의 규정에 해당하는 위원을 각각 1명 이상 포함하여야 한다.
+ ③ 사용자는 적립금운용위원회의 심의를 거친 적립금운용계획서에 따라 적립금을 운용하여야 한다.
+ ④ 적립금운용계획서는 다음 각 호의 내용을 포함하여 매년 1회 이상 작성하여야 한다.
+  1. 적립금 운용 목적 및 목표수익률
+  2. 적립금 운용 방법(자산배분정책, 투자가능상품 등을 포함한다)
+  3. 적립금 운용성과에 대한 평가
+  4. 적립금 운용 담당자의 의무 등 적립금 운용관리에 관한 사항
+
+`}제${isSmall?33:34}조(사업연도) 이 제도의 사업연도는 이 사업의 회계연도를 기준으로 하며, 회계 결산월은 ${h((d.fiscalMonth||"12")+"월")}로 한다.
+
+제${isSmall?34:35}조(규약의 변경) ① 사용자는 이 규약의 내용을 변경하고자 하는 경우에는 근로자대표의 의견을 들어야 한다. 다만, 근로자에게 불리하게 변경하려는 경우에는 근로자대표의 동의를 받아야 한다.
+ ② 사용자는 제1항에 따른 규약의 변경 시 그 내용을 가입자에게 알려야 한다.
+ ③ 사용자는 규약이 변경된 경우 그 내용을 퇴직연금사업자에게 통지하여야 한다.
+
+제${isSmall?35:36}조(법령 등의 준용) ① 이 규약에서 정하지 아니한 사항은 관련 법령 및 취업규칙 등에서 정한 바에 따른다.
+ ② 이 규약에서 정한 사항을 관련 법령에서 변경한 경우에는 그에 따르기로 한다.
+
+
+【부 칙 <${h(sf)}>】
+
+${d.regulationType==="change"?`제1조(시행일) 이 제도는 ${h(sf)}부터 변경하여 시행한다. 다만, 관련 법령 개정에 따른 변경사항은 개정법령 시행일부터 적용한다.`:`제1조(시행일) 이 제도는 ${h(sf)}부터 시행한다.`}${convC}
+${app}`;
+}
+
+// ─── 규약 생성: 혼합형 ──────────────────────────────
+function generateHY(d) {
+  const dbOps=[...(d.dbOperationManagers||[]),...(d.dbOperationManagersBanks||[]),...(d.dbOperationManagersIns||[])];
+  const dcOps=[...(d.dcOperationManagers||[]),...(d.dcOperationManagersBanks||[]),...(d.dcOperationManagersIns||[])];
+  const dbAssets=[...(d.dbAssetManagers||[]),...(d.dbAssetManagersBanks||[]),...(d.dbAssetManagersIns||[])];
+  const dcAssets=[...(d.dcAssetManagers||[]),...(d.dcAssetManagersBanks||[]),...(d.dcAssetManagersIns||[])];
+  const allOps=[...new Set([...dbOps,...dcOps])]; const allAssets=[...new Set([...dbAssets,...dcAssets])];
+  const multiDB=dbOps.length>1; const multiDC=dcOps.length>1||dcAssets.length>1;
+  const isSmall=Number(d.employeeCount)<300;
+  const sf=formatDate(d.startDate); const h=hl;
+  const lead=d.dbLeadProvider||dbOps[0]||"○○○○";
+  const ib=multiDB?"(운용관리기관이 복수인 경우 간사기관)":"";
+
+  // 가입대상
+  let a12=""; const ct=d.coverageType;
+  if(ct==="all") a12=`제12조(가입대상) ① 이 제도의 가입대상은 이 사업에 소속된 근로자로 한다.`;
+  else a12=`제12조(가입대상) ① 이 제도의 가입대상은 이 사업에 소속된 근로자 중 이 제도 가입을 신청하는 자로 한다.`;
+  const excl1=!d.includeUnder1Year, excl15=!d.includeUnder15Hour;
+  let excl="";
+  if(excl1&&excl15) excl=" 다만 계속근로기간이 1년 미만인 근로자, 4주간을 평균하여 1주간의 소정근로시간이 15시간 미만인 근로자에 대하여는 그러하지 아니하다.";
+  else if(excl1) excl=" 다만 계속근로기간이 1년 미만인 근로자에 대하여는 그러하지 아니하다.";
+  else if(excl15) excl=" 다만 4주간을 평균하여 1주간의 소정근로시간이 15시간 미만인 근로자에 대하여는 그러하지 아니하다.";
+  a12+=excl;
+  if(d.includeExecutives) a12+=`\n ② 이 사업의 임원도 이 제도의 가입대상으로 할 수 있다. 다만 이 사업 내에 임원퇴직금지급규정 등 별도로 정한 규정이 있는 경우 이에 따른다.`;
+
+  // 가입기간
+  let a14=`제14조(가입기간) 이 제도의 설정일 이후 가입자가 이 사업에서 근로를 제공한 날부터 제13조제2항 각 호별 자격 상실의 사유가 발생한 날까지를 가입기간으로 한다.`;
+  if(d.retroactive==="full") a14=`제14조(가입기간) ① 이 제도의 설정일 이후 가입자가 이 사업에서 근로를 제공한 날부터 제13조제2항 각 호별 자격 상실의 사유가 발생한 날까지를 가입기간으로 한다.\n ② 제1항에도 불구하고 이 제도의 설정 이전에 이 사업에서 근로를 제공한 기간(이하 "과거근로기간"이라 한다)이 있는 가입자에 대하여는 과거근로기간을 가입기간에 포함한다. 이 경우 법 제8조제2항에 따라 퇴직금을 미리 정산한 기간은 제외한다.`;
+  else if(d.retroactive==="partial") a14=`제14조(가입기간) ① 이 제도의 설정일 이후 가입자가 이 사업에서 근로를 제공한 날부터 제13조제2항 각 호별 자격 상실의 사유가 발생한 날까지를 가입기간으로 한다.\n ② 제1항에도 불구하고 이 제도의 설정 이전에 이 사업에서 근로를 제공한 기간(이하 "과거근로기간"이라 한다)이 있는 가입자에 대하여는 ${h(formatDate(d.retroDate))} 이후 과거근로기간을 가입기간에 포함한다. 이 경우 법 제8조제2항에 따라 퇴직금을 미리 정산한 기간은 제외한다.`;
+
+  // 사업자 선정
+  const singleOps=dbOps.length<=1&&dcOps.length<=1;
+  let a7=""; let a8="";
+  if(singleOps){
+    a7=`제7조(운용관리기관의 선정) 사용자는 법 제28조에 따른 운용관리업무를 수행할 퇴직연금사업자(이하 "운용관리기관"이라 한다)를 다음과 같이 선정한다.\n  1. 확정급여형퇴직연금제도의 운용관리기관\n    명칭: ${h(dbOps[0]||"○○○○")}\n  2. 확정기여형퇴직연금제도의 운용관리기관\n    명칭: ${h(dcOps[0]||"○○○○")}`;
+  } else {
+    a7=`제7조(운용관리기관의 선정) 사용자는 법 제28조에 따른 운용관리업무를 수행할 퇴직연금사업자(이하 "운용관리기관"이라 한다)를 [별지]와 같이 정한다.`;
+  }
+  const singleAssets=dbAssets.length<=1&&dcAssets.length<=1;
+  if(singleAssets){
+    a8=`제8조(자산관리기관의 선정) 사용자는 법 제29조에 따른 자산관리업무를 수행할 퇴직연금사업자(이하 "자산관리기관"이라 한다)를 다음과 같이 선정한다.\n  1. 확정급여형퇴직연금제도의 자산관리기관\n    명칭: ${h(dbAssets[0]||"○○○○")}\n  2. 확정기여형퇴직연금제도의 자산관리기관\n    명칭: ${h(dcAssets[0]||"○○○○")}`;
+  } else {
+    a8=`제8조(자산관리기관의 선정) 사용자는 법 제29조에 따른 자산관리업무를 수행할 퇴직연금사업자(이하 "자산관리기관"이라 한다)를 [별지]와 같이 정한다.`;
+  }
+
+  // 제9조 퇴직연금사업자 선택
+  let a9=`제9조(퇴직연금사업자 선택)`;
+  let a9parts=[];
+  if(multiDB) a9parts.push(`제7조에서 확정급여형퇴직연금제도의 운용관리기관을 복수로 선정한 경우 사용자는 ${h(lead)}을 대표 퇴직연금사업자(이하 "간사기관"이라 한다)로 선정한다. 사용자가 간사기관을 변경한 경우 그 사실을 선정일 또는 변경일부터 7일 이내에 모든 운용관리기관에게 알려야 한다.`);
+  if(multiDC) a9parts.push(`제7조 및 제8조에서 확정기여형 퇴직연금제도의 퇴직연금사업자를 복수로 선정한 경우 가입자는 하나의 기관을 운용관리기관 및 자산관리기관으로 선택하여 가입한다.`);
+  if(a9parts.length>0) a9+="\n"+a9parts.map((p,i)=>` ${["①","②"][i]} ${p}`).join("\n");
+  else a9=""; // 단수면 제9조 불필요
+
+  let wpC=""; if(d.wagepeakProtection) wpC=`\n ③ 제1항에도 불구하고 법 제32조제5항 각 호에 따른 사유로 가입자의 퇴직급여가 감소할 수 있는 경우, 각 산정기간별 계속근로기간 1년에 대하여 30일분의 평균임금에 상당하는 금액을 각각 구한 후 합산한 금액을 이 제도의 급여수준으로 한다.`;
+
+  const payLabel=d.paymentCycle==="monthly"?"매월 말일":d.paymentCycle==="semiannual"?"매 반기 말일":d.paymentCycle==="quarterly"?"매분기 말일":"매년 말일";
+  const ext=d.extensionPeriod==="2month"?"2개월":"1개월";
+
+  // 별지
+  let app="";
+  if(!singleOps||!singleAssets){
+    app+=`\n\n[별지] 이 제도의 운용관리기관 및 자산관리기관\n\n  1. 운용관리기관\n`;
+    app+=`    [확정급여형]\n`; dbOps.forEach(o=>{app+=`      ○ ${h(o)}\n`;}); 
+    app+=`    [확정기여형]\n`; dcOps.forEach(o=>{app+=`      ○ ${h(o)}\n`;});
+    app+=`\n  2. 자산관리기관\n`;
+    app+=`    [확정급여형]\n`; dbAssets.forEach(o=>{app+=`      ○ ${h(o)}\n`;});
+    app+=`    [확정기여형]\n`; dcAssets.forEach(o=>{app+=`      ○ ${h(o)}\n`;});
+  }
+  if(!isSmall){
+    const qe=(d.quantEval||["재무안정성","자산운용실적","고객만족도"]).map(h).join(", ");
+    const ql=(d.qualEval||["제도운용역량","자산운용역량","서비스제공역량"]).map(h).join(", ");
+    const wp=d.workerRepParticipated===true?h("☑ 참여   □ 불참"):d.workerRepParticipated===false?h("□ 참여   ☑ 불참"):"□ 참여   □ 불참";
+    app+=`\n\n[별지] 퇴직연금사업자 선정(변경) 사유서\n\n`;
+    app+=`  1. 퇴직연금사업자 선정(변경) 절차\n     근로자대표와 성실한 협의를 바탕으로 사업자 입찰경쟁 제안공고 후\n     입찰 참여기관 대상 공정한 정량/정성 평가 실시\n\n`;
+    app+=`  2. 평가기준 및 방법\n     [정량평가] ${qe}\n     [정성평가] ${ql}\n\n`;
+    app+=`  3. 선정결과\n     운용관리기관: ${[...new Set([...dbOps,...dcOps])].map(h).join(", ")}\n     자산관리기관: ${[...new Set([...dbAssets,...dcAssets])].map(h).join(", ")}\n     선정 사유: ${h(d.selectionReason||"(선정 사유 입력 필요)")}\n\n`;
+    app+=`  4. 근로자대표 참여여부: ${wp}\n`;
+  }
+
+  // 전환권 (부칙)
+  let convArt="";
+  if(d.allowConversion){
+    const nums="①②③④⑤⑥⑦⑧⑨⑩";
+    let details="";
+    if(d.conversionDetails&&d.conversionDetails.trim()){
+      const lines=d.conversionDetails.trim().split("\n").filter(l=>l.trim());
+      details=lines.map((l,i)=>` ${nums[i+1]} ${h(l.trim())}`).join("\n");
+    } else {
+      details=` ② 제1항에 따른 제도전환 절차 등 구체적 사항은 사용자가 별도로 정한다.`;
+    }
+    convArt=`\n제2조(제도의 전환) ① 가입자는 법 제32조제5항 각 호의 어느 하나에 해당하는 사유가 발생할 경우 다른 퇴직연금제도로 전환할 수 있는 기회를 부여받을 수 있다.\n${details}`;
+  }
+
+  return `혼합형퇴직연금제도규약
+
+${h(d.companyName||"(주)○○○○")}
+
+
+제1장 총 칙
+
+제1조(명칭) 이 규약은 ${h(d.companyName||"(주)○○○○")}의 혼합형퇴직연금제도규약이라 한다.
+
+제2조(목적) 이 규약은 「근로자퇴직급여 보장법」(이하 "법"이라 한다) 제6조에 따라 확정급여형퇴직연금제도 및 확정기여형퇴직연금제도를 함께 설정하여 운영하는 데 필요한 사항을 정함으로써 이 제도 가입자의 안정적인 노후생활 보장에 이바지함을 목적으로 한다.
+
+제3조(정의) 이 규약에서 사용하는 용어의 뜻은 다음과 같다.
+  1. "사용자"란 법 제2조제2호의 규정에 따른 사용자를 말한다.
+  2. "근로자대표"란 법 제4조제3항의 규정에 따른 근로자대표를 말한다.
+  3. 그 밖의 용어의 뜻은 법에서 정한 바에 따른다.
+
+제4조(적용) 이 규약은 다음의 사업 또는 사업장(이하 "사업"이라 한다) 전체에 적용한다.
+    명칭: ${h(d.companyName||"(주)○○○○")}
+    주소: ${h(d.address||"○○시 ○○구 ○○로 ○○번지")}
+
+제5조(성실의무) 사용자 및 근로자는 이 규약과 관련 법령에서 정한 퇴직연금제도의 설정 및 운영에 관한 사항을 성실히 준수하여야 한다.
+
+제6조(설정비율) 확정급여형퇴직연금제도의 급여 및 확정기여형퇴직연금제도의 부담금 수준은 다음 각 호와 같이 정한다.
+  1. 확정급여형퇴직연금제도의 급여: 제15조제1항에 따른 급여수준에 100분의 ${h(d.dbRatio||"50")}을 곱한 수준
+  2. 확정기여형퇴직연금제도의 부담금: 제17조제1항에 따른 부담금 수준에 100분의 ${h(d.dcRatio||"50")}을 곱한 수준
+
+
+제2장 퇴직연금사업자의 선정
+
+${a7}
+
+${a8}
+${a9?"\n"+a9:""}
+
+제10조(퇴직연금사업자의 변경) ① 사용자는 확정급여형퇴직연금제도의 운용관리기관 및 자산관리기관을 변경하고자 하는 경우 근로자대표의 의견을 들어야 한다.
+ ② 사용자는 확정기여형퇴직연금제도의 운용관리기관 및 자산관리기관을 새로 추가하고자 하는 경우에는 근로자대표의 의견을 들어야 하며, 변경하고자 하는 경우에는 근로자대표의 동의를 받아야 한다.
+
+제11조(퇴직연금사업자 선정·변경 시 사용자 책무) 사용자는 제7조 또는 제8조에 따른 퇴직연금사업자를 선정하거나 변경하는 경우, 관련 서비스 제공 등 퇴직연금제도 전반에 대한 능력과 전문성을 종합적으로 판단하여 정하여야 한다.
+
+
+제3장 가입자 및 가입기간
+
+${a12}
+
+제13조(가입자 자격 취득 및 상실) ① 이 제도 설정 이후 가입대상이 되는 날을 가입자 자격 취득일로 본다.
+ ② 다음 각 호에 해당하게 되는 날의 다음 날을 가입자 자격 상실일로 본다.
+  1. 가입자가 사망한 때
+  2. 퇴직, 해고, 그 밖에 취업규칙 또는 별도로 정하는 규정에 따른 사유로 고용 관계가 종료된 때
+  3. 이 제도를 폐지한 때
+ ③ 사용자는 가입자의 자격 취득 또는 상실 사유가 발생한 경우 그 사실을 운용관리기관${ib}에 전달하여 가입자 등재 및 상실 등의 업무처리가 이뤄지도록 하여야 한다.
+
+${a14}
+
+
+제4장 급여 및 부담금 수준, 부담금 납입
+
+제15조(확정급여형퇴직연금제도 급여수준) ① 확정급여형퇴직연금제도에 따른 급여수준은 가입자의 퇴직일을 기준으로 산정한 일시금이 계속근로기간 1년에 대하여 30일분의 평균임금에 상당하는 금액이 되도록 한다.
+ ② 제1항의 평균임금은 근로기준법령에서 정해진 바에 따라 계산한다.${wpC}
+
+제16조(확정급여형퇴직연금제도 부담금의 산정 및 납입) ① 사용자는 확정급여형퇴직연금제도의 가입자에게 제15조에서 정한 급여수준에 따른 급여를 지급하기 위해 매년 1회 이상 정기적으로 부담금을 납입하여야 한다.
+ ② 제1항에 따른 부담금은 자산관리기관에 매년 ${h((d.contribMonth||"12")+"월 "+(d.contribDay||"31")+"일")}까지 납입한다.
+ ③ 사용자는 재정균형을 장기적으로 유지할 수 있도록 운용관리업무를 수행하는 퇴직연금사업자${multiDB?"(복수인 경우 간사기관)":""}에게 관련 법령의 산정방식에 따라 부담금을 적정하게 산출하여 줄 것을 요청하여야 한다.
+ ④ 사용자는 제3항에 따른 부담금을 산출하는데 필요한 단체협약, 취업규칙, 급여명세서, 근로계약서 등의 자료를 퇴직연금사업자에게 제공하여야 한다.
+
+제17조(확정기여형퇴직연금제도 부담금의 산정) ① 사용자는 가입자의 연간 임금총액의 ${h(d.contributionRate||"12분의 1")}에 해당하는 금액을 통화로 가입자의 확정기여형퇴직연금제도 계정에 납입하여야 한다.
+ ② 제1항의 연간 임금총액이라 함은 사용자가 가입자에게 지급한 근로기준법상 임금에 해당하는 금품의 연간 합계액을 말한다.${d.retroactive!=="none"?`
+ ③ 제1항에도 불구하고 과거근로기간에 대한 부담금은 과거근로기간을 가입기간에 포함하기로 한 시점을 기준으로 산정하되, 아래 각 호의 금액 중 큰 금액을 부담금으로 납입하여야 한다.
+  1. 과거근로기간 1년에 대하여 기준시점 이전 1년간 지급받은 임금총액의 12분의 1에 상당하는 금액
+  2. 과거근로기간 1년에 대하여 기준시점을 산정사유 발생일로 하여 산정한 30일분 평균임금에 상당하는 금액`:""}
+ ${d.retroactive!=="none"?"④":"③"} 부담금 산정기간 중에 다음 각 호의 어느 하나에 해당하는 기간이 있는 경우, 제1항에 따른 부담금은 해당 기간에 지급된 임금을 제외한 연간 임금총액을 해당 기간을 제외한 연간 기간으로 나누어 산정한다. 다만 근로자 개인사유로 사용자의 승인을 받은 휴직의 경우 취업규칙 등을 통해 별도로 정한 바가 있는 경우 이에 따른다.
+  1. 「근로기준법 시행령」제2조제1항 각 호의 어느 하나에 해당하는 기간
+  2. 「남녀고용평등과 일·가정 양립 지원에 관한 법률」 제18조의3에 따른 난임치료휴가기간 중 무급기간
+  3. 「남녀고용평등과 일·가정 양립 지원에 관한 법률」제19조의2에 따른 육아기 근로시간 단축 기간
+  4. 「남녀고용평등과 일·가정 양립 지원에 관한 법률」제22조의2에 따른 가족돌봄 휴직 또는 휴가 기간
+  5. 「남녀고용평등과 일·가정 양립 지원에 관한 법률」제22조의3에 따른 가족돌봄 근로시간 단축 기간
+ ${d.retroactive!=="none"?"⑤":"④"} 가입자는 제1항에 따른 사용자 부담금 외에 스스로 부담하는 추가 부담금을 본인의 확정기여형퇴직연금제도 계정에 납입할 수 있다.
+ ${d.retroactive!=="none"?"⑥":"⑤"} 제 12조에 의하여 가입한 임원에 대한 부담금 산정은 이 사업 내에 임원퇴직금지급규정 등 별도로 정한 규정이 있는 경우 이에 따른다.${d.performanceDC&&d.perfCriteria!=="other"?(()=>{
+    const pn=d.retroactive!=="none";
+    const perfArtN=pn?"⑦":"⑥";
+    const perfRefN=pn?"7":"6";
+    const ts='style="border:1px solid #999;padding:4px 10px;text-align:center;font-size:12px;"';
+    const th='style="border:1px solid #999;padding:4px 10px;text-align:center;font-size:12px;background:#f3f4f6;font-weight:bold;"';
+    let tableHtml="";
+    const tiers=d.perfTiers||[{label:"16년 이상",rate:"50"},{label:"7~15년",rate:"40"},{label:"1~6년",rate:"30"}];
+    const hdrCells=tiers.map(t=>`<td ${th}>근속기간(${h(t.label)})</td>`).join("");
+    const dcCells=tiers.map(t=>`<td ${ts}>${h(t.rate+"%")}</td>`).join("");
+    const cashCells=tiers.map(t=>`<td ${ts}>${h((100-Number(t.rate||0))+"%")}</td>`).join("");
+    const execSection=d.includeExecutives&&d.perfRateExec?`<p style="font-size:12.5px;font-weight:bold;margin:16px 0 6px;">＜임원 납입 비율＞</p><p style="font-size:12px;margin:4px 0;">임원 : 경영성과급 DC 납입비율 (단일율)</p><p style="font-size:12px;margin:4px 0;">단일율 : ${h(d.perfRateExec+"%")}</p><p style="font-size:11px;color:#666;margin:6px 0 0;font-style:italic;">단, 임원의 경우 위의 납입비율에 해당하는 금액이 세법상 임원 퇴직소득한도를 초과하는 경우에는 임원 퇴직소득한도 내에서 납부할 수 있다.</p>`:"";
+    tableHtml=`</pre><div style="margin:12px 0;"><p style="font-size:12.5px;font-weight:bold;margin-bottom:6px;">＜직원 납입 비율＞</p><table style="border-collapse:collapse;width:auto;"><tr><td ${th}>구분</td>${hdrCells}</tr><tr><td ${ts}>DC 적립 비율</td>${dcCells}</tr><tr><td ${ts}>현금 지급 비율</td>${cashCells}</tr></table>${execSection}</div><pre style="font-size:12.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word;font-family:'D2Coding','Nanum Gothic Coding',monospace;margin:0;color:#1f2937;">`;
+    return `\n ${perfArtN} 사용자는 제1항에 따른 사용자 부담금 외에 이 사업의 경영실적 등에 따라 지급여부 및 지급액이 결정되는 급여(이하 "경영성과급"이라 한다.)를 제12조에 따른 가입자 자격을 취득하는 날부터 다음의 납입비율로 가입자의 확정기여형퇴직연금제도 계정에 추가 납입하여야 한다.${tableHtml}\n ${pn?"⑧":"⑦"} 제${perfRefN}항에도 불구하고 가입자는 다음 각 호에 해당하는 날에 경영성과급을 향후 적립하지 아니할 것을 선택할 수 있다.\n  1. 이 사업에 제${perfRefN}항의 적립방식이 최초로 설정되는 날 (이 사업에 최초로 근무하게 된 날에 제${perfRefN}항의 적립 방식이 이미 설정되어 있는 경우에는 제12조에 따른 가입 대상이 되는 날)\n  2. 제${perfRefN}항의 적립방식이 변경되는 날\n ${pn?"⑨":"⑧"} 가입자는 제${perfRefN}항에 따른 납입 비율을 임의로 변경하거나, 납입 중단 또는 추가 납입을 임의로 선택할 수 없다.`;
+  })():""}
+
+제18조(확정기여형퇴직연금제도 부담금의 납입) ① 사용자는 제17조제1항에 따른 부담금을 ${h(payLabel)}까지 정기적으로 가입자의 확정기여형퇴직연금제도 계정에 납입하여야 한다.${d.retroactive!=="none"?`
+ ② 사용자는 제17조제3항에 따른 부담금을 과거근로기간을 가입기간에 포함시킨 날에 일시 납입하여야 한다.`:""}
+ ${d.retroactive!=="none"?"③":"②"} 제17조제${d.retroactive!=="none"?"5":"4"}항에 따른 추가 부담금은 가입자가 자산관리기관에 직접 납부할 수 있다.
+
+제19조(확정기여형퇴직연금제도 부담금 미납 시 처리) ① 사용자가 제17조제1항에 따른 부담금을 제18조제1항에 따라 정하여진 기일(이하 "정기 납입일"이라 한다)까지 납입하지 아니한 경우 정기 납입일로부터 ${h(ext)}이 되는 날까지 납부기간을 연장한다.
+ ② 법 제20조제3항 후단에 따라 제1항에 따라 연장된 기일까지 제17조제1항에 따른 부담금을 납입한 경우 지연이자는 적용하지 아니한다.
+ ③ 사용자가 제1항에 따라 연장된 기일까지 제17조제1항에 따른 부담금을 납입하지 아니하는 경우 그 연장된 기일 다음 날부터 부담금을 납입한 날까지 지연 일수에 대하여 다음 각 호의 구분에 따른 지연이자율을 적용하여 납입하여야 한다.
+  1. 제1항에 따라 연장된 납입 기일의 다음 날을 기산일로 하여 가입자의 퇴직 등 급여를 지급할 사유가 발생한 날부터 14일까지의 기간: 연 100분의 10
+  2. 제1호에 따른 기간의 다음 날부터 부담금을 납입하는 날까지의 기간: 연 100분의 20
+ ④ 제3항에도 불구하고 「근로자퇴직급여 보장법 시행령」(이하 "영"이라 한다) 제12조에 따라 지연이자의 적용제외 사유가 있는 경우에는 지연이자를 적용하지 아니한다.
+
+
+제5장 급여
+
+제20조(급여의 종류 및 수급요건) 이 제도에 따른 급여의 종류는 연금 또는 일시금으로 하되, 수급요건은 다음 각 호와 같다.
+  1. 연금은 55세 이상으로서 가입기간이 10년 이상인 가입자에게 지급할 것. 이 경우 연금의 지급기간은 5년 이상이어야 한다.
+  2. 일시금은 연금수급 요건을 갖추지 못하거나 일시금 수급을 원하는 가입자에게 지급할 것
+
+제21조(급여의 지급사유 발생) ① 급여의 지급사유는 이 제도의 가입자가 제13조제2항제1호부터 제3호까지의 어느 하나에 해당되어 가입자 자격을 상실하게 된 경우 발생한다.${d.excludeUnder1YearBenefit?`\n ② 제1항에도 불구하고 계속근로기간이 1년 미만인 가입자가 그 자격을 상실한 경우에는 급여의 지급사유에 해당하지 아니한다.`:""}
+
+제22조(확정급여형퇴직연금제도 급여 지급기한 등) ① 사용자는 급여를 지급할 사유가 발생한 날부터 14일 이내에 퇴직연금사업자로 하여금 적립금의 범위에서 급여지급의무가 있는 급여 전액을 지급하도록 하여야 한다.
+ ② 사용자는 제1항에도 불구하고 특별한 사정이 있는 경우에는 가입자 및 퇴직연금사업자와 합의하여 지급기일을 연장할 수 있다.
+ ③ 사용자는 제1항에도 불구하고 영 제8조 각 호의 사유에 해당하는 경우 퇴직연금사업자로 하여금 법 제16조제1항제2호에 따른 금액에 대한 적립금의 비율에 해당하는 금액을 지급하도록 하여야 한다.
+ ④ 사용자는 제3항에 따라 퇴직연금사업자가 지급하는 급여수준이 제15조에 따른 급여수준에 미치지 못할 때에는 급여를 지급할 사유가 발생한 날부터 14일 이내에 그 부족한 금액을 해당 근로자에게 지급하여야 한다.
+
+제23조(확정기여형퇴직연금제도 급여 지급기한 및 미납 부담금 등의 납입) ① 사용자는 급여를 지급할 사유가 발생한 경우 14일 이내에 제17조에 따른 부담금을 가입자의 이 제도 계정에 납입하여야 한다.
+ ② 사용자는 제19조제1항에 따른 미납 부담금이 있는 경우에는 그 미납 부담금과 제19조제3항에 따른 지연이자를 급여를 지급할 사유가 발생한 날부터 14일 이내에 해당 가입자의 이 제도의 계정에 납입하여야 한다.
+ ③ 사용자는 제1항 및 제2항에도 불구하고 특별한 사정이 있는 경우 가입자와의 합의에 따라 납입 기일을 연장할 수 있다.
+
+제24조(급여의 지급) ① 사용자는 제22조 및 제23조의 급여를 지급하는 경우 가입자가 지정한 개인형퇴직연금제도의 계정 또는 중소기업퇴직연금기금제도의 가입자명의의 부담금 계정(이하 "개인형퇴직연금제도의 계정등"이라 한다)으로 이전하는 방법으로 한다.
+ ② 가입자는 이 제도 가입 이후 7일 이내에 제1항에 따른 급여를 이전받기 위한 개인형퇴직연금제도의 계정등을 설정하고 그 확인자료(퇴직연금사업자가 발급한 개인형퇴직연금제도 계정 확인서 등. 이하 "개인형퇴직연금제도 확인서"라 한다)를 사용자에게 제출하는 등의 방법으로 지정의 의사를 표시하여야 한다.
+ ③ 제21조에 따른 급여 지급사유 발생이 예정되거나 발생했음에도 불구하고 가입자가 개인형퇴직연금제도의 계정등을 지정하지 아니한 경우, 사용자는 제1항에 따라 급여가 이전될 수 있도록 가입자에게 개인형퇴직연금제도의 계정등을 지정할 것을 신속히 안내하여야 한다.
+ ④ 제2항 및 제3항에도 불구하고 급여를 지급할 사유가 발생한 날부터 7일 이내에 가입자가 개인형퇴직연금제도의 계정등을 지정하지 아니하는 경우에는 법 제17조제5항에 따라 "가입자 명의의 개인형퇴직연금제도"계정등으로 이전한다. 이 경우 가입자가 해당 퇴직연금사업자에게 개인형퇴직연금제도를 설정한 것으로 본다.
+ ⑤ 제4항에 따른 "해당 퇴직연금사업자"란 이 제도에 따라 가입자의 혼합형퇴직연금제도의 계정이 설정되었던 자산관리기관을 말한다.
+ ⑥ 제1항에도 불구하고 영 제9조 각 호의 사유에 해당하는 경우에는 개인형퇴직연금제도의 계정등으로의 이전 이외의 방법으로 급여를 지급할 수 있다.
+
+제25조(급여의 지급절차) ① 사용자는 급여를 지급할 사유가 발생한 경우 제24조에 따른 개인형퇴직연금제도의 계정등으로 급여를 이전할 것을 운용관리기관(확정급여형퇴직연금제도의 운용관리기관이 복수일 경우 간사기관)에 지시하여야 한다.
+ ② 사용자는 제1항에 따라 급여의 지급을 지시할 때에는 가입자가 제출한 개인형퇴직연금제도 확인서를 첨부하여야 한다. 다만 제24조제4항의 경우에는 그러하지 아니하다.
+ ③ 사용자는 운용관리기관(확정급여형퇴직연금제도의 운용관리기관이 복수일 경우 간사기관)으로 하여금 급여의 지급사유 발생 사실 등을 자산관리기관에 전달하도록 하여 가입자의 개인형퇴직연금제도의 계정등으로 급여가 이전될 수 있도록 하여야 한다.
+ ④ 사용자는 확정급여형퇴직연금제도의 운영에 있어 운용관리기관이 복수인 경우 간사기관이 다른 운용관리기관에도 급여의 지급사유 발생 사실 등을 전달하도록 하여 필요한 업무 협조가 이루어질 수 있도록 하여야 한다.
+ ⑤ 사용자는 가입자가 퇴직연금사업자에 직접 급여를 청구한 경우에는 퇴직연금사업자가 지체 없이 그 내용을 사용자에게 알리도록 하여 제1항에 따른 지급 지시가 이루어질 수 있도록 하여야 한다.
+ ⑥ 제1항에도 불구하고 사업의 도산 등으로 사용자를 통한 급여의 지급절차 진행이 곤란한 경우 가입자는 퇴직연금사업자에게 직접 급여를 청구할 수 있다.
+ ⑦ 확정기여형퇴직연금제도에 있어 가입자는 퇴직할 때에 받을 급여를 갈음하여 그 운용 중인 자산을 가입자가 설정한 개인형퇴직연금제도의 계정등으로 이전해 줄 것을 해당 퇴직연금사업자에게 요청할 수 있다.
+ ⑧ 제7항에 따른 가입자의 요청이 있는 경우 퇴직연금사업자는 그 운용 중인 자산을 가입자의 개인형퇴직연금제도 계정등으로 이전하여야 한다. 이 경우 확정기여형퇴직연금제도 운용에 따른 가입자에 대한 급여는 지급된 것으로 본다.
+
+
+제6장 확정급여형퇴직연금제도 급여 지급능력의 확보
+
+제26조(부담금의 산정, 납입 및 급여 지급능력 확보) ① 사용자는 이 제도의 가입자에게 제15조에서 정한 급여수준에 따른 급여를 지급하기 위해 매년 1회 이상 정기적으로 부담금을 납입하여야 한다.
+ ② 사용자는 급여 지급능력을 확보하기 위하여 매 사업연도 말 법 제16조제1항 본문에 따른 기준책임준비금에 100분의 100을 곱하여 산출한 금액(이하 "최소적립금"이라 한다) 이상을 적립금으로 적립하여야 한다.
+ ③ 제2항에도 불구하고 과거근로기간을 가입기간에 포함한 경우에는 법 제16조제1항 단서에 따라 법 제16조제1항 본문에 따른 기준책임준비금에 과거근로기간의 연수(年數)와 가입 후 연차(年次)의 구분에 따라 고용노동부 고시로 정한 비율을 곱하여 산출한 금액 이상을 적립금으로 적립하여야 한다.
+ ④ 사용자는 운용관리기관(운용관리기관이 복수인 경우 간사기관)이 매 사업연도 종료 후 6개월 이내에 영 제6조에 따른 재정검증을 실시할 수 있도록 하여야 한다.
+ ⑤ 사용자는 영 제6조에 따른 재정검증을 하는데 필요한 단체협약, 취업규칙, 급여명세서, 근로계약서 등의 자료를 사업연도 종료 후 3개월 이내에 운용관리기관(운용관리기관이 복수인 경우 간사기관)에게 제공하여야 한다. 이 경우 사용자는 자료를 고의로 누락하거나 거짓으로 작성하여 제공해서는 안 된다.
+
+제27조(재정검증결과 통보 협조) ① 영 제6조에 따른 재정검증 결과 적립금이 최소적립금보다 적은 경우 퇴직연금사업자가 전체 근로자에게 그 결과를 서면 또는 정보통신망에 의한 방법으로 알리기 위하여 사용자에게 다음 각 호의 사항을 협조 요청하는 경우 사용자는 특별한 사유가 없는 한 협조하여야 한다.
+  1. 사용자가 운영하는 사내 전산망에 대한 이용 제공
+  2. 전체 근로자의 주소 또는 전자우편 주소의 제공
+  3. 사용자에게 서면 또는 정보통신망을 활용하여 전체 근로자를 대상으로 재정검증결과를 통보하는 행위의 수행
+ ② 다만 제1항에도 불구하고 근로자의 과반수가 가입한 노동조합이 있는 경우 그러하지 아니하다.
+
+제28조(적립 부족의 해소) 사용자는 영 제6조에 따른 재정검증 결과 적립금이 최소적립금의 95%에 미치지 못하는 것으로 확인된 경우 다음 각 호의 조치를 하여야 한다.
+  1. 사용자는 부담금 납입 등을 통해 최소적립금 대비 부족분 비율의 3분의 1 이상을 직전 사업연도 종료 후 1년 이내에 해소하여야 한다.
+
+
+제7장 확정기여형퇴직연금제도 적립금의 운용
+
+제29조(적립금 운용방법 선정 및 운용지시) ① 가입자는 운용관리기관이 제시한 적립금 운용방법 중에서 스스로의 선택으로 운용방법을 선정할 수 있고, 반기 1회 이상 이를 변경할 수 있다.
+ ② 가입자는 제1항에 따라 적립금 운용방법을 선정하거나 변경하고자 하는 경우 운용관리기관이 정하는 절차 및 방법에 따라 운용지시를 하여야 한다.
+ ③ 사용자는 가입자가 적립금 운용방법을 변경하는 경우 중도해지이율 적용 또는 중도해지에 따른 수수료 등의 부담에 관한 구체적 내용을 운용관리기관으로 하여금 가입자에게 안내하도록 하여야 한다.
+
+제30조(적립금 운용방법 제시) ① 사용자는 운용관리기관으로 하여금 반기마다 1회 이상 위험과 수익구조가 서로 다른 세 가지 이상의 적립금 운용방법을 가입자에게 제시하도록 하여야 한다.
+ ② 사용자는 운용관리기관이 제1항에 따라 적립금의 운용방법을 제시함에 있어 다음 각 호의 요건을 갖춘 운용방법을 제시하도록 하여야 한다.
+  1. 운용방법에 관한 정보의 취득과 이해가 쉬울 것
+  2. 운용방법 간의 변경이 쉬울 것
+  3. 적립금 운용결과의 평가 방법과 절차가 투명할 것
+  4. 영 제25조제1항에 따른 원리금보장 운용방법이 하나 이상 포함될 것
+
+제31조(적립금 운용방법의 정보제공) ① 사용자는 운용관리기관으로 하여금 다음 각 호에서 정한 사항을 포함하여 가입자가 적립금 운용방법을 선정하는 데 필요한 정보를 제공하도록 하여야 한다.
+  1. 운용방법별 이익 및 손실의 가능성
+  2. 운용방법별 과거 3년간의 이익 또는 손실 관련 실적. 다만 해당 운용방법의 과거 취급기간이 3년에 미치지 못하는 경우에는 그 취급기간에 한한다.
+  3. 운용방법의 선정 또는 변경에 따라 발생하는 운용수탁보수, 중도해지 또는 환매수수료 등의 비용 및 그 부담 방법에 관한 사항
+  4. 예금자보호법에 의한 보호대상 등 지급보장의 정도
+  5. 그 밖에 가입자가 운용지시를 하는 데 필요한 정보
+ ② 사용자는 운용관리기관이 다음 각 호의 어느 하나에 해당하는 방법으로 적립금 운용방법에 관한 정보를 가입자에게 제공하도록 하여야 한다.
+  1. 우편 발송
+  2. 서면 교부
+  3. 정보통신망에 의한 전송
+ ③ 사용자는 운용관리기관으로 하여금 가입자에게 매 반기 1회 이상 정기적으로 제1항에 따른 적립금 운용방법의 제시 및 운용방법에 관한 정보의 제공을 하도록 하여야 한다.
+
+제32조(사전지정운용방법의 선정) ① 가입자는 제29조에 따른 운용방법 선정과 별도로 운용관리기관이 [별지]에 따라 제시하는 사전지정운용방법 중 하나를 본인이 적용받을 사전지정운용방법으로 선정해야 한다.
+ ② 가입자는 제1항에서 선정한 사전지정운용방법을 변경할 수 있다.
+
+제32조의2(사전지정운용방법에 대한 정보제공) ① 사용자는 가입자가 제32조에 따른 사전지정운용방법을 선정할 수 있도록 운용관리기관으로 하여금 [별지]의 사전지정운용방법에 대하여 다음 각 호의 사항에 관한 정보를 제공하게 하여야 한다.
+  1. 해당 사전지정운용방법의 자산배분 현황 및 위험·수익 구조
+  2. 법 제21조의3제2항부터 제5항에 따른 사전지정운용제도의 운영에 대한 내용
+  3. 위험등급, 손실가능성 및 과거수익률
+  4. 수수료 등 가입자가 부담하는 비용에 관한 사항
+  5. 예금자 보호 한도 등 가입자의 보호에 관한 사항
+  6. 사전지정운용방법의 적용에 따른 퇴직연금자산의 위험도 변경 가능성
+  7. 법 제21조의3제6항에 따라 사전지정운용방법이 변경될 수 있다는 사실과 그 절차
+  8. 사전지정운용방법의 승인일자 등 승인에 관한 사항
+  9. 기타 고용노동부장관이 정하는 사항
+ ② 사용자는 운용관리기관이 제1항에 따른 정보를 서면 또는 정보통신망 등에 의한 방법으로 알릴 수 있도록 가입자에 관한 정보 제공에 협조해야 한다.
+
+제32조의3(사전지정운용방법 적용의 통지) 사용자는 제29조제1항에 따른 적립금 운용방법을 선정하지 않은 가입자가 다음 각 호에 해당하는 경우, 운용관리기관으로 하여금 제32조에 따라 가입자가 선정한 사전지정운용방법으로 적립금이 운용됨을 통지하도록 하여야 한다.
+  1. 가입자가 이 제도에 가입하고 사용자가 제17조에 따른 부담금을 최초로 납입한 때
+  2. 가입자가 제29조제1항에 따라 스스로 선정한 적립금 운용방법의 기간 만료일부터 4주가 지났을 때
+
+제32조의4(사전지정운용방법의 적용) ① 가입자가 제32조의3에 따른 통지를 받은 이후에도 별도의 운용지시 없이 2주가 경과한 경우 제32조제1항에 따라 본인이 선정한 사전지정운용방법으로 적립금이 운용된다.
+ ② 제1항에 따라 적립금을 운용하는 가입자는 언제든지 제29조에 따라 적립금 운용방법을 스스로 선정할 수 있다.
+
+제32조의5(사전지정운용방법의 변경) 사용자는 운용관리기관이 [별지]에 따른 사전지정운용방법 중 어느 하나에 대하여 고용노동부 장관으로부터 변경 승인을 받은 경우, 운용관리기관으로 하여금 변경 승인을 받은 날부터 7일 이내에 해당 사전지정운용방법을 본인이 적용받을 사전지정운용방법으로 선정하였거나 운용하고 있는 가입자에게 다음 각 호의 내용을 포함하여 통지하도록 해야 한다.
+  1. 사전지정운용방법 변경 사유
+  2. 변경되는 사전지정운용방법에 관한 정보로서 제32조의2제1항 각 호에 관한 사항
+  3. 사전지정운용방법 변경에 대한 고용노동부장관의 승인 사실
+  4. 가입자의 적립금이 변경된 사전지정운용방법으로 운용된다는 사실
+  5. 변경된 사전지정운용방법으로 운용된 이후 가입자는 언제든지 스스로 운용방법을 선정할 수 있다는 사실
+
+제32조의6(사전지정운용방법 취소) ① 사용자는 [별지]에 따른 사전지정운용방법이 고용노동부장관으로부터 승인 취소된 경우에는 운용관리기관으로 하여금 해당 사전지정운용방법을 본인이 적용받을 사전지정운용방법으로 선정하였거나 해당 사전지정운용방법으로 적립금이 운용되고 있는 가입자에게 다음 각 호의 사항을 통지하도록 해야 한다.
+  1. 승인 취소 사유
+  2. 승인 취소된 사전지정운용방법의 해지 방법·절차에 관한 사항
+  3. 다른 사전지정운용방법을 포함한 3가지 이상의 운용방법에 관한 정보로서 제32조의2 제1항 각 호에 관한 정보
+ ② 제1항의 조치에도 불구하고 가입자가 해당 사전지정운용방법을 해지하지 않거나 다른 운용방법을 선택하지 않을 경우 퇴직연금사업자로 하여금 가입자의 적립금을 같은 위험등급의 다른 사전지정운용방법으로 이전하여 운용할 수 있다는 사실을 통지하도록 해야 한다.
+ ③ 제2항에 따라 적립금을 운용하는 경우 퇴직연금사업자로 하여금 다음 각 호의 사항을 통지하도록 해야 한다.
+  1. 적립금을 이전하여 운용한다는 사실
+  2. 적립금을 이전한 운용방법에 관한 정보로서 제32조의2 제1항 각 호에 관한 정보
+
+
+제8장 수급권의 보호 및 중도인출
+
+제33조(수급권의 보호) ① 가입자는 이 제도의 급여를 받을 권리를 양도 또는 압류하거나 담보로 제공할 수 없다.
+ ② 제1항에도 불구하고 가입자는 다음 각 호의 어느 하나에 해당하는 사유와 요건을 갖춘 경우에는 이 제도의 급여를 받을 권리를 담보로 제공할 수 있다.
+  1. 무주택자인 가입자가 본인 명의로 주택을 구입하는 경우
+  2. 무주택자인 가입자가 주거를 목적으로 「민법」 제303조에 따른 전세금 또는 「주택임대차보호법」 제3조의2에 따른 보증금을 부담하는 경우. 이 경우 가입자가 하나의 사업에 근로하는 동안 1회로 한정한다.
+  3. 가입자가 6개월 이상 요양을 필요로 하는 다음 각 목의 어느 하나에 해당하는 사람의 질병이나 부상에 대한 의료비(「소득세법 시행령」 제118조의5제1항 및 제2항에 따른 의료비를 말한다. 이하 같다.)를 부담하는 경우
+   가. 가입자 본인
+   나. 가입자의 배우자
+   다. 가입자 또는 그 배우자의 부양가족(「소득세법」제50조제1항제3호에 따른 부양가족을 말한다. 이하 같다.)
+  4. 담보를 제공하는 날부터 거꾸로 계산하여 5년 이내에 가입자가 「채무자 회생 및 파산에 관한 법률」에 따라 파산선고를 받은 경우
+  5. 담보를 제공하는 날부터 거꾸로 계산하여 5년 이내에 가입자가 「채무자 회생 및 파산에 관한 법률」에 따라 개인회생절차개시 결정을 받은 경우
+  6. 다음 각 목의 어느 하나에 해당하는 사람의 대학등록금, 혼례비 또는 장례비를 가입자가 부담하는 경우
+   가. 가입자 본인
+   나. 가입자의 배우자
+   다. 가입자 또는 그 배우자의 부양가족
+  7. 그 밖에 사업주의 휴업 실시로 근로자의 임금이 감소하거나 재난으로 피해를 입은 경우 등 고용노동부장관이 정하여 고시하는 사유와 요건에 해당하는 경우
+ ③ 제2항에 따른 담보제공의 한도는 법령 및 고용노동부장관이 정하여 고시하는 한도에 따른다.
+ ④ 사용자는 가입자가 대출을 받고자 하는 경우 퇴직연금사업자(자산관리기관)로부터 필요한 서류를 발급받을 수 있도록 하여야 한다.
+
+제34조(중도인출) ① 가입자는 다음 각 호의 어느 하나에 해당하는 사유가 발생하면 적립금을 중도인출할 수 있다.
+  1. 제33조제2항제1호, 제2호, 제7호(재난으로 피해를 입은 경우로 한정한다)에 해당하는 경우
+  2. 제33조제2항제3호에 해당하는 경우로서 가입자가 본인 연간 임금총액의 1천분의 125를 초과하여 의료비를 부담하는 경우
+  3. 중도인출을 신청한 날부터 거꾸로 계산하여 5년 이내에 가입자가 「채무자 회생 및 파산에 관한 법률」에 따라 파산선고를 받은 경우
+  4. 중도인출을 신청한 날부터 거꾸로 계산하여 5년 이내에 가입자가 「채무자 회생 및 파산에 관한 법률」에 따라 개인회생절차개시 결정을 받은 경우
+  5. 법 제7조제2항 후단에 따라 퇴직연금제도의 급여를 받을 권리를 담보로 제공하고 대출을 받은 가입자가 그 대출 원리금을 상환하기 위한 경우로서 고용노동부장관이 정하여 고시하는 사유에 해당하는 경우. 단, 그 중도인출 금액은 대출 원리금의 상환에 필요한 금액 이하로 한다.
+ ② 가입자는 중도인출을 받고자 하는 경우 제1항의 어느 하나에 해당하는 사유를 갖추었음을 증빙할 수 있는 자료를 첨부하여 퇴직연금사업자에게 중도인출을 신청하여야 한다.
+
+
+제9장 운용·자산관리업무 계약의 체결, 해지 및 이전
+
+제35조(운용관리업무에 관한 계약의 체결) ① 사용자는 법 제28조에 따라 다음 각 호의 업무(이하 "운용관리업무"라 한다)를 하는 것을 내용으로 하는 계약을 제7조에서 선정한 운용관리기관과 체결하여야 한다.
+  1. 가입자에 대한 적립금 운용방법 및 운용방법별 정보의 제공
+  1의2. 사전지정운용제도의 설정 및 운영에 관한 업무
+  2. 적립금 운용현황의 기록·보관·통지
+  3. 가입자가 선정한 운용방법을 자산관리기관에게 전달하는 업무
+  4. 그 밖에 운용관리업무의 적절한 수행을 위하여 필요한 업무
+ ② 사용자는 운용관리업무에 관한 계약을 체결 또는 변경하는 경우 그 내용을 가입자에게 알려야 한다.
+
+제36조(자산관리업무에 관한 계약의 체결) ① 사용자는 법 제29조에 따라 다음 각 호의 업무(이하 "자산관리업무"라 한다)를 하는 것을 내용으로 하는 계약을 제8조에서 선정한 자산관리기관과 체결하여야 한다.
+  1. 계좌의 설정 및 관리
+  2. 부담금의 수령
+  3. 적립금의 보관 및 관리
+  4. 운용관리기관이 전달하는 적립금 운용지시의 이행
+  5. 급여의 지급
+  6. 그 밖에 자산관리업무의 적절한 수행을 하는데 필요한 업무
+ ② 사용자는 제1항에 따른 계약을 체결하려는 경우에는 가입자를 피보험자 또는 수익자로 하여 영 제24조에서 정하는 요건을 갖춘 보험계약 또는 신탁계약의 방법으로 하여야 한다.
+ ③ 사용자는 자산관리업무에 관한 계약을 체결 또는 변경하는 경우 그 내용을 가입자에게 알려야 한다.
+
+제37조(수수료의 부담) ① 사용자 부담금에 대한 운용관리 및 자산관리업무 수수료는 사용자가 부담한다.
+ ② 가입자 추가 부담금에 대한 운용관리 및 자산관리업무 수수료는 가입자가 부담한다.
+ ③ 사용자는 제2항에 따른 수수료율 및 부담방법 등 그 구체적 사항을 퇴직연금사업자로 하여금 가입자에게 알리도록 하여야 한다.
+
+제38조(계약해지) 사용자는 다음 각 호의 어느 하나에 해당하는 경우에 제35조 및 제36조에 따른 계약을 해지할 수 있다.
+  1. 이 제도의 폐지
+  2. 퇴직연금사업자의 변경
+  3. 퇴직연금사업자의 계약 위반
+  4. 퇴직연금사업자의 등록취소 또는 등록말소
+
+제39조(계약이전) 사용자는 제38조 제2호부터 제4호까지의 사유에 해당하는 경우 이 제도의 이전에 필요한 조치를 하여야 한다.
+
+
+제10장 제도의 폐지·중단
+
+제40조(제도의 폐지) ① 이 제도는 다음 각 호의 어느 하나에 해당하는 경우에 폐지할 수 있다.
+  1. 사업의 폐업·소멸·도산
+  2. 다른 퇴직급여제도로의 변경
+ ② 사용자는 제1항에 따라 이 제도를 폐지하는 경우 근로자대표의 동의를 받아야 한다.
+ ③ 사용자는 영 제38조제1호에 따라 폐지한 날부터 1개월 이내에 고용노동부장관에게 폐지신고서를 제출하여야 한다.
+ ④ 사용자는 이 제도 폐지일을 기준으로 산정된 적립금, 적립부족액 및 가입자별 미납 부담금, 가입자별 급여 내역 및 지급절차, 중간정산 대상기간 등을 가입자에게 통지하여야 한다.
+ ⑤ 사용자는 제4항에 따른 통지를 함에 있어 확정기여형퇴직연금제도의 미납 부담금이 있는 경우에는 그 금액과 지연이자를 포함한 금액, 납입 예정일 및 해소 방안도 함께 제시하여야 한다.
+ ⑥ 사용자는 이 제도 폐지일부터 14일 이내에 확정기여형퇴직연금제도의 미납 부담금 및 지연이자를 퇴직연금사업자에게 납입한 후 퇴직연금사업자로 하여금 급여를 지급하도록 하는데 필요한 조치를 하여야 한다.
+
+제41조(제도 폐지 시 급여 처리) ① 제40조에 따라 가입자가 급여를 받은 경우에는 법 제8조제2항에 따라 중간정산되어 받은 것으로 본다.
+ ② 제1항에 따른 가입자별 중간정산금(확정급여형퇴직연금제도만 해당한다) 및 대상기간은 다음 각 호의 구분에 따른다.
+  1. 확정급여형퇴직연금제도의 경우: 중간정산금은 이 제도에 따라 적립된 금액을 가입자별 근속기간·평균임금과 제15조에 따른 급여수준을 고려하여 안분·산정하고, 중간정산 대상기간은 중간정산금을 기준으로 환산
+  2. 확정기여형퇴직연금제도의 경우: 중간정산 대상기간은 가입자별로 퇴직연금에 가입한 날부터 사용자가 납입한 부담금에 대응하는 기간의 마지막 날까지로 환산
+ ③ 사용자는 이 제도의 폐지로 퇴직연금사업자로 하여금 가입자에게 급여를 지급하도록 하는 경우 제22조부터 제25조까지의 규정을 따른다.
+
+제42조(제도의 운영중단) ① 사용자가 법 또는 이 규약에 위반되는 행위를 하여 고용노동부장관이 이 제도의 중단을 명한 경우 이 제도의 운용을 중단하기로 한다.
+ ② 이 제도의 운용이 중단된 경우 중단된 기간에 대하여는 법 제8조제1항에 따른 퇴직금제도를 적용한다.
+ ③ 사용자는 이 제도의 중단에도 불구하고 다음 각 호의 기본적인 업무는 유지하여야 한다.
+  1. 가입자에게 제도 중단 사유 및 중단일, 재개시 일정, 미납 부담금이 있는 경우 그 납입계획 등 제도 중단기간의 처리방안 등의 공지
+  2. 가입자 교육의 실시
+  3. 급여 지급의 요청, 적립금 운용 등과 관련하여 법령 등에 규정된 업무의 이행을 위해 필요한 조치
+  4. 그 밖에 이 제도의 연속성 유지 및 가입자 보호를 위하여 필요한 업무
+ ④ 사용자는 이 제도의 중단에도 불구하고 퇴직연금사업자로 하여금 다음 각 호의 기본적인 업무를 유지하도록 하여야 한다.
+  1. 가입자 퇴직 등에 따른 급여의 지급
+  2. 가입자 교육을 위탁받은 경우 위탁받은 교육의 실시
+  3. 급여의 지급, 적립금의 운용, 운용현황의 통지 등과 관련하여 법령 및 운용·자산관리업무의 계약에서 정해진 업무
+  4. 그 밖의 이 제도의 연속성 유지 및 가입자 보호를 위하여 필요한 업무
+
+
+제11장 운용현황의 통지 및 가입자 교육
+
+제43조(운용현황의 통지) ① 사용자는 운용관리기관으로 하여금 확정급여형퇴직연금제도의 적립금액 및 운용수익률 등의 운용현황과 확정기여형퇴직연금제도의 가입자별 운용현황을 매년 1회 이상 가입자에게 통지하도록 하여야 한다. 확정기여형퇴직연금제도의 경우 가입자별 적립금의 운용수익 및 운용방법별 구성비율 등의 내용이 포함되어야 한다.
+ ② 제1항에 따른 운용현황의 통지는 다음 각 호의 어느 하나에 해당하는 방법으로 이루어져야 한다.
+  1. 우편 발송
+  2. 서면 교부
+  3. 정보통신망에 의한 전송
+  4. 그 밖에 이에 준하는 방식으로 사용자와 운용관리기관이 체결한 운용관리업무에 관한 계약에서 정한 방법
+ ③ 사용자는 제1항에 불구하고 확정기여형퇴직연금제도에서 다음 각 호의 어느 하나에 해당하는 사유가 발생한 경우에는 퇴직연금사업자로 하여금 운용현황의 구체적인 내용을 그 사유가 발생한 날부터 10일 이내에 가입자에게 알리도록 하여야 한다.
+  1. 부담금이 납입 예정일부터 1개월 이상 미납된 경우
+  2. 적립금 운용수익률이 현저히 변동한 경우로서 고용노동부장관이 정하는 기준에 해당하는 경우
+
+제44조(가입자 교육) ① 사용자는 매년 1회 이상 가입자에게 이 제도의 운영상황 등 다음 각 목의 사항에 대하여 교육을 실시하여야 한다.
+  1. 제도 일반에 관한 교육사항
+   가. 급여 종류에 관한 사항, 수급요건, 급여액 등 제도별 특징 및 차이점
+   나. 담보대출, 중도인출, 지연이자 등 해당 사업의 퇴직연금제도 운영에 관한 사항
+   다. 급여 또는 부담금 산정의 기준이 되는 임금 등에 관한 사항
+   라. 퇴직 시 급여 지급절차 및 개인형퇴직연금제도로의 적립금 이전에 관한 사항
+   마. 연금소득세, 퇴직소득세 등 과세 체계에 관한 사항
+   바. 해당 사업의 퇴직연금제도를 중단하거나 폐지하는 경우 그 처리방법
+   사. 가입자의 소득, 자산, 부채, 나이 및 근속연수 등을 고려한 자산·부채관리의 일반적 원칙과 노후 설계의 중요성에 관한 사항
+  2. 확정급여형퇴직연금제도의 설정에 따른 추가 교육사항
+   가. 최근 3년간의 부담금 납입현황
+   나. 급여종류별 표준적인 급여액 수준
+   다. 직전 사업연도 말 기준 최소적립금 대비 적립금 현황
+   라. 적립금이 최소적립금보다 적은 경우 그 부족분 납입 이행 상황
+   마. 그 밖에 적립금 운용현황, 운용목표 등에 관한 사항
+  3. 확정기여형퇴직연금제도의 설정에 따른 추가 교육사항
+   가. 사용자의 부담금 수준, 납입시기 및 납입 현황
+   나. 분산투자 등 적립금의 안정적 운용을 위하여 행하는 투자원칙에 관한 사항
+   다. 퇴직연금사업자가 제시하는 집합투자증권 등 적립금 운용방법별 수익구조, 매도기준가, 투자 위험 및 수수료 등에 관한 사항
+ ② 제1항에 따른 교육의 방법 및 절차에 관한 사항은 다음 각 호의 구분에 따른다.
+  1. 제1항제1호의 제도 일반에 관한 교육사항은 사내 전산망 또는 해당 사업장 등 가입자의 접근이 가능한 곳에 교육 자료 상시 게시하여 가입자가 수시로 열람할 수 있도록 한다. 다만, 퇴직연금제도를 도입한 후 최초로 하는 교육은 다음 각 목 중 하나 이상의 방법으로 실시한다.
+   가. 서면 또는 전자우편 등을 통한 교육자료의 발송
+   나. 연수·회의·강의 등 집합교육의 실시
+   다. 정보통신망을 활용한 온라인 교육의 실시
+  2. 제1항제2호의 확정급여형퇴직연금 제도의 설정에 따른 추가 교육사항은 사내 전산망 또는 해당 사업장 등 가입자의 접근이 가능한 곳에 교육 자료 상시 게시하여 가입자가 수시로 열람할 수 있도록 하거나, 제1호 각 목의 어느 하나에 해당하는 방법으로 실시한다.
+  3. 제1항제3호의 확정기여형퇴직연금제도의 설정에 따른 추가 교육사항은 제1호 각 목의 어느 하나에 해당하는 방법으로 실시한다.
+ ③ 사용자는 퇴직연금사업자 또는 영 제32조의3에 따른 요건을 갖춘 전문기관(이하 "전문기관"이라 한다)에 제1항 및 제2항에 따른 교육의 실시를 위탁할 수 있다.
+ ④ 제3항에 따라 퇴직연금사업자 또는 전문기관에 가입자 교육의 실시를 위탁하는 경우 사용자는 퇴직연금사업자 또는 전문기관과 교육시기, 교육내용, 구체적 교육방법 등을 포함한 계약을 체결하여 퇴직연금사업자 또는 전문기관으로 하여금 위탁계약의 내용에 따라 교육을 실시하도록 하여야 한다.
+ ⑤ 사용자는 제3항 및 제4항에 따라 교육의 실시를 위탁한 경우 교육의 실시를 위하여 필요한 사항에 협조하고, 그 실시 결과를 확인하여야 한다.
+
+
+제12장 기타
+
+제45조(사업연도) 이 제도의 사업연도는 이 사업의 회계연도를 기준으로 하며, 회계 결산월은 ${h((d.fiscalMonth||"12")+"월")}로 한다.
+
+제46조(규약의 변경) ① 사용자는 이 규약의 내용을 변경하고자 하는 경우에는 근로자대표의 의견을 들어야 한다. 다만, 근로자에게 불리하게 변경하려는 경우에는 근로자대표의 동의를 받아야 한다.
+ ② 사용자는 제1항에 따른 규약의 변경 시 그 내용을 가입자에게 알려야 한다.
+ ③ 사용자는 규약이 변경된 경우 그 내용을 퇴직연금사업자에게 통지하여야 한다.
+
+제47조(법령 등의 준용) ① 이 규약에서 정하지 아니한 사항은 관련 법령 및 취업규칙 등에서 정한 바에 따른다.
+ ② 이 규약에서 정한 사항을 관련 법령에서 변경한 경우에는 그에 따르기로 한다.
+
+
+【부 칙 <${h(sf)}>】
+
+${d.regulationType==="change"?`제1조(시행일) 이 제도는 ${h(sf)}부터 변경하여 시행한다. 다만, 관련 법령 개정에 따른 변경사항은 개정법령 시행일부터 적용한다.`:`제1조(시행일) 이 제도는 ${h(sf)}부터 시행한다.`}${convArt}
+${app}`;
+}
+
+// ─── FAQ 생성 ──────────────────────────────────────
+function generateFAQ(d,planType) {
+  const allAssets=[...(d.assetManagers||[]),...(d.assetManagersBanks||[]),...(d.assetManagersIns||[])];
+  const ext=d.extensionPeriod==="2month"?"2개월":"1개월";
+  if(planType==="DC") return [
+    {q:"우리 회사 직원이 중도인출 가능한 경우는?",a:"규약에 따라 (1) 무주택자의 주택구입·전세금 부담, (2) 본인 연간 임금총액의 12.5% 초과 의료비, (3) 5년 이내 파산·개인회생, (4) 재난 피해, (5) 담보대출 원리금 상환 시 가능합니다.",article:"제26조"},
+    {q:"부담금을 제때 못 내면 어떻게 되나요?",a:`[재직 중인 근로자] 정기 납입일로부터 최대 ${ext}까지 납입기일이 연장되며, 이 기간 내 납입 시 지연이자가 발생하지 않습니다. 단, 연장된 납입기일을 초과하여 미납할 경우, 연장기일 다음 날부터 연 10%의 지연이자가 적용됩니다.\n(수식) 지연이자 = 미지급액 × 연 10% × (지연일수 / 365)\n\n[퇴직자] 급여 지급사유 발생(퇴직 등) 시, 미납 부담금은 원칙적으로 규약상 연장기간과 무관하게 퇴직일로부터 14일 이내에 납입해야 합니다. 지연이자는 미납 발생일(연장기일 다음 날)부터 퇴직 후 14일까지는 연 10%, 15일째부터 실제 납입일까지는 연 20%로 상승하여 부과됩니다.\n(수식) 지연이자 = 미지급액 × 연 10% × (퇴직일 14일 이내 지연일수/365) + 미지급액 × 연 20% × (퇴직일 15일 이후 지연일수/365)`,article:"제15조"},
+    {q:d.includeExecutives?"임원의 가입 범위는?":"임원도 가입할 수 있나요?",a:d.includeExecutives?"사용종속 관계에서 근로를 제공하고 임금을 받는 임원(등기이사 포함)이 가입대상에 포함됩니다.":"현재 규약에서 임원은 가입대상에서 제외되어 있습니다.",article:"제10조"},
+    {q:"퇴직 시 급여는 어떻게 지급되나요?",a:`가입자가 지정한 IRP 계정으로 이전됩니다. 기한 내 미지정 시 해당 자산관리기관(${allAssets[0]||"○○"})이 운영하는 IRP로 자동 이전됩니다.`,article:"제19조"},
+    {q:"적립금 운용방법을 변경할 수 있나요?",a:"가입자는 매 반기 1회 이상 운용방법을 변경할 수 있습니다.",article:"제21조"},
+    {q:"사전지정운용방법(디폴트옵션)이란?",a:"가입자가 별도 운용지시를 하지 않을 경우 적용되는 운용방법으로, 가입자가 직접 선정합니다.",article:"제24조"},
+    {q:"가입자 교육은 어떻게 실시하나요?",a:d.educationDelegate!==false?"매년 1회 이상 퇴직연금사업자에 위탁하여 진행합니다.":"매년 1회 이상 사용자가 직접 실시합니다.",article:"제36조"},
+    {q:"제도 폐지는 어떻게 하나요?",a:"사업 소멸·도산 또는 다른 퇴직급여제도로의 변경 시 폐지 가능하며, 근로자대표 동의 후 1개월 이내 신고합니다.",article:"제32조"},
+  ];
+  return [
+    {q:"DB형에서 사용자의 책임은?",a:"사용자는 매 사업연도 말 기준책임준비금의 100% 이상을 적립해야 하며, 적립금이 최소적립금의 95%에 미달하면 재정안정화계획서를 작성하여야 합니다.",article:"제19조"},
+    {q:"임금피크제 시 급여 보전은?",a:d.wagepeakProtection?"각 산정기간별 평균임금 기반으로 급여를 합산하여 산정합니다.":"별도 규정 없이 퇴직일 기준 평균임금으로 산정됩니다.",article:"제12조"},
+    {q:"적립금이 부족하면 어떻게 되나요?",a:"퇴직 시 적립금이 급여수준에 미치지 못하면 사용자가 14일 이내에 부족분을 직접 지급해야 합니다.",article:"제15조"},
+    {q:d.includeExecutives?"임원의 가입 범위는?":"임원도 가입할 수 있나요?",a:d.includeExecutives?"사용종속 관계에서 근로를 제공하고 임금을 받는 임원이 가입대상에 포함됩니다.":"현재 규약에서 임원은 제외되어 있습니다.",article:"제9조"},
+    {q:"재정검증은 언제 실시하나요?",a:"매 사업연도 종료 후 6개월 이내에 운용관리기관이 재정검증을 실시합니다.",article:"제19조"},
+    {q:"가입자 교육은 어떻게 실시하나요?",a:d.educationDelegate!==false?"매년 1회 이상 퇴직연금사업자에 위탁하여 진행합니다.":"매년 1회 이상 사용자가 직접 실시합니다.",article:"제31조"},
+    {q:"적립 부족이 발생하면?",a:"최소적립금 대비 부족분 비율의 1/3 이상을 1년 이내에 해소해야 하며, 재정안정화계획서를 작성하여 3년간 보존합니다.",article:"제21조"},
+  ];
+}
+
+// ─── 핵심 요약 ─────────────────────────────────────
+function generateSummary(d,planType) {
+  const allOps=[...(d.operationManagers||[]),...(d.operationManagersBanks||[]),...(d.operationManagersIns||[])];
+  const allAssets=[...(d.assetManagers||[]),...(d.assetManagersBanks||[]),...(d.assetManagersIns||[])];
+  const covMap={all:"전체 근로자",specific_group:d.specificGroup||"특정 집단",after_date:"특정시점 이후 입사자",choice:"근로자 선택제"};
+  const cycMap={monthly:"매월",quarterly:"매분기",yearly:"매년"};
+  const base=[
+    {section:"사업장",items:[{k:"회사명",v:d.companyName},{k:"사업자번호",v:d.bizNo},{k:"대표자",v:d.ceoName},{k:"업종",v:d.industry},{k:"상시근로자",v:(d.employeeCount||0)+"명"},{k:"주소",v:d.address}]},
+  ];
+  if(planType==="DC") base.push({section:"제도 설계",items:[
+    {k:"가입대상",v:covMap[d.coverageType]||"전체 근로자"},{k:"임원 포함",v:d.includeExecutives?"포함":"제외"},
+    {k:"1년 미만자",v:d.includeUnder1Year?"포함":"제외 (법 기본)"},{k:"15시간 미만자",v:d.includeUnder15Hour?"포함":"제외 (법 기본)"},
+    {k:"부담금 수준",v:"연간 임금총액의 "+(d.contributionRate||"12분의 1")},{k:"납입 주기",v:cycMap[d.paymentCycle]||"매월"},
+    {k:"과거근로기간",v:d.retroactive==="full"?"전부 소급":d.retroactive==="partial"?"일부 소급":"소급 없음"},
+  ]});
+  else if(planType==="DB") base.push({section:"제도 설계 (DB형)",items:[
+    {k:"급여수준",v:d.benefitType==="progressive"?"누진율 적용":"법정 기본 (1년당 30일분 평균임금)"},
+    {k:"임금피크 보전",v:d.wagepeakProtection?"별도 산정 기준 마련":"별도 규정 없음"},
+    {k:"가입대상",v:covMap[d.coverageType]||"전체 근로자"},{k:"임원 포함",v:d.includeExecutives?"포함":"제외"},
+    {k:"1년 미만자",v:d.includeUnder1Year?"포함":"제외 (법 기본)"},{k:"15시간 미만자",v:d.includeUnder15Hour?"포함":"제외 (법 기본)"},
+  ]});
+  else base.push({section:"제도 설계 (혼합형)",items:[
+    {k:"DB 설정비율",v:(d.dbRatio||"-")+"%"},{k:"DC 설정비율",v:(d.dcRatio||"-")+"%"},
+    {k:"가입대상",v:covMap[d.coverageType]||"전체 근로자"},{k:"임원 포함",v:d.includeExecutives?"포함":"제외"},
+    {k:"1년 미만자",v:d.includeUnder1Year?"포함":"제외 (법 기본)"},{k:"15시간 미만자",v:d.includeUnder15Hour?"포함":"제외 (법 기본)"},
+    {k:"임금피크 보전",v:d.wagepeakProtection?"별도 산정":"없음"},
+    {k:"DC 부담금",v:"연간 임금총액의 "+(d.contributionRate||"12분의 1")},
+    {k:"과거근로기간",v:d.retroactive==="full"?"전부 소급":d.retroactive==="partial"?"일부 소급":"소급 없음"},
+  ]});
+  if(planType==="HY"){
+    const dbo=[...(d.dbOperationManagers||[]),...(d.dbOperationManagersBanks||[]),...(d.dbOperationManagersIns||[])];
+    const dco=[...(d.dcOperationManagers||[]),...(d.dcOperationManagersBanks||[]),...(d.dcOperationManagersIns||[])];
+    const dba=[...(d.dbAssetManagers||[]),...(d.dbAssetManagersBanks||[]),...(d.dbAssetManagersIns||[])];
+    const dca=[...(d.dcAssetManagers||[]),...(d.dcAssetManagersBanks||[]),...(d.dcAssetManagersIns||[])];
+    base.push({section:"퇴직연금사업자",items:[
+      {k:"DB 운용관리기관",v:dbo.join(", ")||"-"},{k:"DB 자산관리기관",v:dba.join(", ")||"-"},
+      ...(dbo.length>1?[{k:"DB 간사기관",v:d.dbLeadProvider||"-"}]:[]),
+      {k:"DC 운용관리기관",v:dco.join(", ")||"-"},{k:"DC 자산관리기관",v:dca.join(", ")||"-"},
+    ]});
+  } else {
+    base.push({section:"퇴직연금사업자",items:[
+      {k:"운용관리기관",v:allOps.join(", ")||"-"},{k:"자산관리기관",v:allAssets.join(", ")||"-"},
+      ...(planType==="DB"&&allOps.length>1?[{k:"간사기관",v:d.leadProvider||"-"}]:[]),
+    ]});
+  }
+  base.push({section:"운영 사항",items:[
+    {k:d.regulationType==="change"?"규약 변경일":"제도 시행일",v:d.startDate||"-"},
+    {k:"신고 유형",v:d.regulationType==="change"?"규약 변경":"신규 설정"},
+    {k:"결산월",v:(d.fiscalMonth||"12")+"월"},
+    {k:"가입자 교육",v:d.educationDelegate!==false?"퇴직연금사업자 위탁":"직접 실시"},
+    {k:"제도 전환권",v:d.allowConversion?"부여 (부칙 제2조)":"미부여"},
+  ]});
+  return base;
+}
+
+// ─── 근퇴법 적합성 검증 ─────────────────────────────
+function complianceChecks(d,planType) {
+  const allOps=[...(d.operationManagers||[]),...(d.operationManagersBanks||[]),...(d.operationManagersIns||[])];
+  const allAssets=[...(d.assetManagers||[]),...(d.assetManagersBanks||[]),...(d.assetManagersIns||[])];
+  if(planType==="HY"){
+    const dbo=[...(d.dbOperationManagers||[]),...(d.dbOperationManagersBanks||[]),...(d.dbOperationManagersIns||[])];
+    const dco=[...(d.dcOperationManagers||[]),...(d.dcOperationManagersBanks||[]),...(d.dcOperationManagersIns||[])];
+    const dba=[...(d.dbAssetManagers||[]),...(d.dbAssetManagersBanks||[]),...(d.dbAssetManagersIns||[])];
+    const dca=[...(d.dcAssetManagers||[]),...(d.dcAssetManagersBanks||[]),...(d.dcAssetManagersIns||[])];
+    return [
+      {label:"법 제6조 혼합형 규약 필수항목 충족",ok:true},
+      {label:"제6조 DB+DC 설정비율 합 100% 이상",ok:(Number(d.dbRatio||0)+Number(d.dcRatio||0))>=100},
+      {label:"법 제15조 급여수준 (30일분 평균임금 이상)",ok:true},
+      {label:"법 제17조 급여 수급요건 (55세, 10년)",ok:true},
+      {label:"법 제28조 DB 운용관리기관 선정",ok:dbo.length>0},
+      {label:"법 제28조 DC 운용관리기관 선정",ok:dco.length>0},
+      {label:"법 제29조 DB 자산관리기관 선정",ok:dba.length>0},
+      {label:"법 제29조 DC 자산관리기관 선정",ok:dca.length>0},
+      {label:"법 제21조 가입자 교육 의무",ok:true},
+    ];
+  }
+  if(planType==="DC") return [
+    {label:"법 제19조 규약 필수항목 충족",ok:true},
+    {label:"법 제20조 부담금 최소 기준 (1/12 이상)",ok:["12분의 1","12분의 1.5","10분의 1","8분의 1"].includes(d.contributionRate)},
+    {label:"법 제17조 급여 수급요건 (55세, 10년)",ok:true},
+    {label:"법 제17조 IRP 이전 규정",ok:true},
+    {label:"법 제28조 운용관리기관 선정",ok:allOps.length>0},
+    {label:"법 제29조 자산관리기관 선정",ok:allAssets.length>0},
+    {label:"영 제25조 원리금보장 운용방법 포함",ok:true},
+    {label:"법 제21조 가입자 교육 의무",ok:true},
+    {label:"법 제21조의3 사전지정운용방법 규정",ok:true},
+  ];
+  return [
+    {label:"법 제13조 규약 필수항목 충족",ok:true},
+    {label:"법 제15조 급여수준 (30일분 평균임금 이상)",ok:true},
+    {label:"법 제17조 급여 수급요건 (55세, 10년)",ok:true},
+    {label:"법 제16조 최소적립금 기준 충족",ok:true},
+    {label:"법 제17조 IRP 이전 규정",ok:true},
+    {label:"법 제28조 운용관리기관 선정",ok:allOps.length>0},
+    {label:"법 제29조 자산관리기관 선정",ok:allAssets.length>0},
+    {label:"영 제6조 재정검증 규정 포함",ok:true},
+    {label:"법 제21조 가입자 교육 의무",ok:true},
+  ];
+}
+
+// ─── NEXT STEP 체크리스트 ────────────────────────────
+function NextStepTab({data,planType}) {
+  const isDC=planType==="DC"||planType==="HY";
+  const isLarge=Number(data.employeeCount||0)>=300;
+  const payLabel=data.paymentCycle==="monthly"?"매월 말일":data.paymentCycle==="semiannual"?"매 반기 말일":data.paymentCycle==="quarterly"?"매분기 말일":"매년 말일";
+  const [mode,setMode]=useState("online"); // "online" | "offline"
+  const [docTab,setDocTab]=useState("ldoc"); // "ldoc" | "kdoc"
+  const [checked,setChecked]=useState({});
+  const toggle=id=>setChecked(p=>({...p,[id]:!p[id]}));
+
+  // 실무 검증 텍스트
+  const onlineProc=["고용노동부 홈페이지(www.moel.go.kr) 접속","메뉴: 민원 → 민원신청","'퇴직연금' 검색 → 확정기여형 선택","비회원 로그인(간편인증)","신청 작성 및 PDF 서류 2종 첨부","신고 완료 후 접수번호 저장"];
+  const onlineDocs=["확정기여형 퇴직연금 규약 (PDF 변환)","근로자 동의서 또는 근로자 대표 동의 확인서 (PDF)"];
+
+  const offlineProc=["업체 소재지 관할 노동관청 민원실에 서류 접수 (ex. 서울지방노동청 영등포지청)","근로개선지도과에서 규약 심사 진행","규약 수리통보서 업체 통보 (접수 후 약 2주 소요, 팩스+등기)"];
+  const offlineDocs=["확정기여형 퇴직연금 규약 (원본)","퇴직연금 규약 신고서 (법인정보+근로자동의 날짜)","근로자 대표 동의 확인서","근로자 동의서 (전체 취합본)"];
+
+  const onlineSteps=onlineProc.map((t,i)=>({id:"o"+(i+1),label:t,desc:""}));
+  const offlineSteps=offlineProc.map((t,i)=>({id:"p"+(i+1),label:t,desc:""}));
+
+  const filingSteps=mode==="online"?onlineSteps:offlineSteps;
+
+  // 실무 검증 서류 목록
+  const lDocs=["사업자등록증 사본","법인등기사항전부증명서 (말소사항 포함/3개월 이내)","법인인감증명서 (3개월 이내)","반환계좌 통장사본","대리인 신분증 사본","주주명부","사용인감계 (양식 없는 경우 퇴직연금사업자 양식 사용)","퇴직연금 규약 & 수리통보서"];
+  const lDocsNote=["사업보고서 제출대상 법인이 아닐 경우: 주주명부","최대지분소유가 법인일 경우: 해당 법인의 주주명부","주주명부가 없을 경우: 출자자 확인서"];
+  const kDocs=["퇴직연금 제도 가입신청서 (사업자 양식)","계좌개설 신청서 (사업자 양식)","운용관리 계약서 (사업자 양식)","자산관리 계약서 (사업자 양식)","고객거래 확인서 (사업자 양식)","본인확인서 (법인용, 사업자 양식)"];
+
+
+  const fileDocs=mode==="online"?onlineDocs:offlineDocs;
+  const fileDocItems=fileDocs.map((d,i)=>({id:(mode==="online"?"od":"fd")+i,label:d,desc:""}));
+  const lDocItems=lDocs.map((d,i)=>({id:"ld"+i,label:d,desc:""}));
+  const kDocItems=kDocs.map((d,i)=>({id:"kd"+i,label:d,desc:""}));
+  const all=[...filingSteps,...fileDocItems,{id:"rcvd"},...lDocItems,...kDocItems];
+  const done=all.filter(s=>checked[s.id]).length;
+  const pct=Math.round(done/all.length*100);
+
+  const Item=({s})=>(
+    <div onClick={()=>toggle(s.id)} style={{display:"flex",gap:10,padding:"10px 12px",borderRadius:8,cursor:"pointer",background:checked[s.id]?"#f0fdf4":"#f9fafb",border:`1px solid ${checked[s.id]?"#86efac":"#e5e7eb"}`,marginBottom:6,alignItems:"flex-start"}}>
+      <div style={{width:20,height:20,borderRadius:4,border:`2px solid ${checked[s.id]?"#059669":"#d1d5db"}`,background:checked[s.id]?"#059669":"#fff",flexShrink:0,marginTop:1,display:"flex",alignItems:"center",justifyContent:"center"}}>
+        {checked[s.id]&&<span style={{color:"#fff",fontSize:11,fontWeight:800}}>✓</span>}
+      </div>
+      <div>
+        <div style={{fontSize:13,fontWeight:600,color:checked[s.id]?"#059669":"#1f2937",textDecoration:checked[s.id]?"line-through":"none"}}>{s.label}</div>
+        <div style={{fontSize:11.5,color:"#6b7280",marginTop:2,lineHeight:1.5}}>{s.desc}</div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      {/* 진행률 */}
+      <div style={{background:"linear-gradient(135deg,#f0fdf4,#dcfce7)",borderRadius:10,padding:"12px 16px",marginBottom:16,border:"1px solid #bbf7d0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:13,fontWeight:700,color:"#065f46"}}>전체 진행률</div>
+          <div style={{fontSize:12,color:"#6b7280",marginTop:2}}>{done} / {all.length} 완료</div>
+        </div>
+        <div style={{fontSize:22,fontWeight:800,color:pct===100?"#059669":"#16a34a"}}>{pct}%</div>
+      </div>
+
+      {/* 1단계: 규약신고 */}
+      <div style={{fontSize:13.5,fontWeight:700,color:"#5A2800",marginBottom:10}}>📋 1단계 · 규약신고</div>
+
+      {/* 온라인/오프라인 토글 */}
+      <div style={{display:"flex",gap:0,marginBottom:14,borderRadius:8,overflow:"hidden",border:"1.5px solid #d1d5db",width:"fit-content"}}>
+        {[{v:"online",l:"🌐 온라인 신고"},{v:"offline",l:"🏢 오프라인 신고"}].map(o=>(
+          <button key={o.v} onClick={()=>setMode(o.v)}
+            style={{padding:"7px 18px",fontSize:12.5,fontWeight:600,border:"none",cursor:"pointer",
+              background:mode===o.v?"#5A2800":"#fff",color:mode===o.v?"#fff":"#6b7280"}}>
+            {o.l}
+          </button>
+        ))}
+      </div>
+
+      {/* 신고 프로세스 */}
+      {filingSteps.map(s=><Item key={s.id} s={s}/>)}
+
+      {/* 준비서류 */}
+      <div style={{background:"#fffbeb",borderRadius:8,padding:"10px 14px",border:"1px solid #fde68a",marginTop:10}}>
+        <div style={{fontSize:12,fontWeight:700,color:"#92400e",marginBottom:6}}>
+          {mode==="online"?"📄 구비서류 PDF 2종":"📁 오프라인 신고 필수 서류 4종"}
+        </div>
+        {fileDocItems.map(s=><Item key={s.id} s={s}/>)}
+      </div>
+
+      {/* 수리통보서 */}
+      <div style={{background:"#f0fdf4",borderRadius:8,padding:"10px 14px",border:"1px solid #bbf7d0",marginTop:8,marginBottom:4}}>
+        <div style={{fontSize:12,fontWeight:700,color:"#065f46",marginBottom:6}}>📬 규약 수리통보서</div>
+        <div style={{fontSize:12,color:"#065f46",lineHeight:1.6,marginBottom:8}}>
+          {mode==="offline"?"접수 후 약 2주 내 팩스+등기로 발송됩니다.":"온라인 신고 완료 후 접수번호를 저장해두세요."}
+        </div>
+        <Item s={{id:"rcvd",label:mode==="offline"?"규약 수리통보서 수령 완료":"온라인 신고 접수 완료",desc:mode==="offline"?"수리통보서는 계좌개설 시 법인 준비서류에 포함됩니다.":""}}/>
+      </div>
+
+      {/* 2단계: 계좌 개설 */}
+      <div style={{fontSize:13.5,fontWeight:700,color:"#5A2800",margin:"20px 0 8px"}}>🏦 2단계 · 계좌 개설 준비서류</div>
+
+      {/* 법인/사업자 준비서류 */}
+      <div style={{background:"#fffbeb",borderRadius:8,padding:"12px 14px",border:"1px solid #fde68a",marginTop:10}}>
+        <div style={{fontSize:12,fontWeight:700,color:"#92400e",marginBottom:2}}>⚠️ 서류 양식과 작성 방식은 퇴직연금사업자마다 다를 수 있습니다</div>
+        {/* 법인/사업자 탭 */}
+        <div style={{display:"flex",gap:0,margin:"10px 0 10px",borderRadius:6,overflow:"hidden",border:"1px solid #fde68a",width:"fit-content"}}>
+          {[{v:"ldoc",l:`📁 법인 준비서류 (${lDocs.length}종)`},{v:"kdoc",l:`🏦 퇴직연금사업자 준비서류 (${kDocs.length}종)`}].map(o=>(
+            <button key={o.v} onClick={()=>setDocTab(o.v)}
+              style={{padding:"6px 14px",fontSize:12,fontWeight:600,border:"none",cursor:"pointer",
+                background:docTab===o.v?"#92400e":"#fffbeb",color:docTab===o.v?"#fff":"#92400e"}}>
+              {o.l}
+            </button>
+          ))}
+        </div>
+        {docTab==="ldoc"&&(<>
+          {lDocItems.map(s=><Item key={s.id} s={s}/>)}
+          <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid #fde68a"}}>
+            <div style={{fontSize:11.5,fontWeight:600,color:"#92400e",marginBottom:4}}>※ 주주명부 관련 안내</div>
+            {lDocsNote.map((d,i)=>(
+              <div key={i} style={{display:"flex",gap:6,fontSize:11.5,color:"#78350f",marginBottom:3}}>
+                <span style={{flexShrink:0}}>•</span><span>{d}</span>
+              </div>
+            ))}
+          </div>
+        </>)}
+        {docTab==="kdoc"&&kDocItems.map(s=><Item key={s.id} s={s}/>)}
+      </div>
+
+      {pct===100&&<div style={{marginTop:16,padding:"12px 16px",background:"linear-gradient(135deg,#ecfdf5,#d1fae5)",borderRadius:10,border:"1px solid #6ee7b7",textAlign:"center",fontSize:13,fontWeight:700,color:"#065f46"}}>🎉 모든 절차 완료! 퇴직연금제도가 정상 운영 중입니다.</div>}
+    </div>
+  );
+}
+
+// ─── AI 챗봇 ───────────────────────────────────────
+function ChatBot({regulation,data,planType}) {
+  const [messages,setMessages]=useState([]);
+  const [input,setInput]=useState("");
+  const [loading,setLoading]=useState(false);
+  const endRef=useRef(null);
+  useEffect(()=>{if(endRef.current)endRef.current.scrollIntoView({behavior:"smooth"});},[messages]);
+  const EXAMPLES=planType==="DC"?["중도인출 가능한 사유는?","부담금 지연이자는?","퇴직 시 IRP로 어떻게 이전돼?","사전지정운용방법이란?"]:["DB형에서 사용자 책임은?","임금피크제 시 급여는?","재정검증은 언제 해?","적립금 부족하면?"];
+  const send=async(text)=>{
+    if(!text.trim()||loading) return;
+    const userMsg={role:"user",content:text.trim()};
+    setMessages(p=>[...p,userMsg]); setInput(""); setLoading(true);
+    try {
+      const tmp=document.createElement("div");tmp.innerHTML=regulation;
+      const regText=tmp.textContent||tmp.innerText||"";
+      const sysPrompt=`당신은 ${planType}형 퇴직연금 규약 전문 상담 AI입니다.\n\n답변 규칙:\n1. 반드시 규약 조문 번호를 인용 (예: "제15조에 따르면...")\n2. 규약에 없는 내용은 "이 규약에 명시되어 있지 않습니다"\n3. 핵심만 간결하게 3-5문장\n\n=== 규약 전문 ===\n${regText}`;
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:sysPrompt,messages:[...messages,userMsg].map(m=>({role:m.role,content:m.content}))}),
+      });
+      const result=await res.json();
+      const text=result.content?result.content.filter(c=>c.type==="text").map(c=>c.text).join(""):"응답을 생성할 수 없었습니다.";
+      setMessages(p=>[...p,{role:"assistant",content:text}]);
+    } catch(err) {
+      setMessages(p=>[...p,{role:"assistant",content:"AI 규약 상담 어시스턴트는 추후 연동 예정입니다. 현재는 '자주 묻는 질문' 탭을 이용해주세요."}]);
+    }
+    setLoading(false);
+  };
+  return (<div style={{display:"flex",flexDirection:"column",height:460}}>
+    {messages.length===0&&<div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flex:1,padding:"30px 16px",textAlign:"center"}}>
+      <div style={{fontSize:28,marginBottom:8}}>🤖</div>
+      <p style={{fontSize:14,fontWeight:700,color:"#5A2800",margin:"0 0 6px"}}>{data.companyName} 규약 AI 상담</p>
+      <p style={{fontSize:12,color:"#6b7280",margin:"0 0 14px"}}>AI 규약 상담 어시스턴트는 추후 연동 예정입니다. 현재는 '자주 묻는 질문' 탭을 이용해주세요.</p>
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"center"}}>
+        {EXAMPLES.map((ex,i)=><button key={i} style={{padding:"7px 14px",fontSize:11.5,fontWeight:500,background:"#f3f4f6",border:"1px solid #e5e7eb",borderRadius:20,color:"#4b5563",cursor:"pointer"}} onClick={()=>send(ex)}>{ex}</button>)}
+      </div>
+    </div>}
+    <div style={{flex:1,overflowY:"auto",padding:"12px 0"}}>
+      {messages.map((m,i)=><div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",marginBottom:10,padding:"0 4px"}}>
+        <div style={m.role==="user"?{maxWidth:"75%",padding:"9px 14px",borderRadius:"16px 16px 4px 16px",background:"#5A2800",color:"#fff",fontSize:13,lineHeight:1.6}:{maxWidth:"80%",padding:"9px 14px",borderRadius:"16px 16px 16px 4px",background:"#f3f4f6",color:"#1f2937",fontSize:13,lineHeight:1.6}}>
+          {m.content.split("\n").map((line,j)=><p key={j} style={{margin:j>0?"6px 0 0":0}}>{line}</p>)}
+        </div>
+      </div>)}
+      {loading&&<div style={{display:"flex",justifyContent:"flex-start",padding:"0 4px"}}><div style={{padding:"9px 14px",borderRadius:"16px 16px 16px 4px",background:"#f3f4f6",fontSize:12.5,color:"#9ca3af",fontStyle:"italic"}}>규약을 분석하고 있습니다...</div></div>}
+      <div ref={endRef} />
+    </div>
+    <div style={{display:"flex",gap:8,padding:"10px 0 0",borderTop:"1px solid #e5e7eb"}}>
+      <input style={{flex:1,padding:"10px 14px",fontSize:13,border:"1.5px solid #d1d5db",borderRadius:20,outline:"none"}} placeholder="규약에 대해 질문하세요..." value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send(input);}}} disabled={loading} />
+      <button style={{padding:"8px 18px",borderRadius:20,fontSize:13,fontWeight:600,border:"none",background:"#5A2800",color:"#fff",cursor:"pointer",flexShrink:0,opacity:input.trim()&&!loading?1:0.4}} onClick={()=>send(input)} disabled={!input.trim()||loading}>전송</button>
+    </div>
+  </div>);
+}
+
+// ─── 신고서 Word 파일 생성 ──────────────────────────
+function generateSingoWord(data, planType) {
+  const { Document: Doc, Packer: Pk, Paragraph: Para, TextRun: TR, AlignmentType: AT,
+    Table: Tbl, TableRow: TRow, TableCell: TCell, BorderStyle: BS, WidthType: WT,
+    VerticalAlign: VA, ShadingType: ShT } = docx;
+  const FONT = "맑은 고딕";
+  const bdr = { style: BS.SINGLE, size: 1, color: "000000" };
+  const borders = { top: bdr, bottom: bdr, left: bdr, right: bdr };
+  const mg = { top: 40, bottom: 40, left: 100, right: 100 };
+
+  function cell(text, width, opts = {}) {
+    const paras = [];
+    const textStr = text || "";
+    textStr.split("\n").forEach(line => {
+      paras.push(new Para({ alignment: opts.align || AT.LEFT, spacing: { before: 20, after: 20, line: 280 },
+        children: [new TR({ text: line, font: FONT, size: opts.size || 18, bold: opts.bold })] }));
+    });
+    return new TCell({ borders, width: { size: width, type: WT.DXA }, margins: mg,
+      verticalAlign: VA.CENTER, columnSpan: opts.span || 1,
+      shading: opts.shade ? { fill: "F0F0F0", type: ShT.CLEAR } : undefined, children: paras });
+  }
+
+  function p(text, opts = {}) {
+    return new Para({ alignment: opts.align || AT.LEFT,
+      spacing: { before: opts.before || 0, after: opts.after || 0, line: opts.line || 280 },
+      indent: opts.indent ? { left: opts.indent } : undefined,
+      children: [new TR({ text: text || "", font: FONT, size: opts.size || 18, bold: opts.bold, color: opts.color })] });
+  }
+
+  const isNew = data.regulationType !== "change";
+  const chkDC = (planType === "DC" || planType === "HY") ? "√" : " ";
+  const chkDB = (planType === "DB" || planType === "HY") ? "√" : " ";
+  const chkHY = planType === "HY" ? "√" : " ";
+  const fmtDate = (d) => d ? d.replace(/-/g,".").replace(/(\d{4})\.(\d{2})\.(\d{2})/,"$1년      $2월      $3일") : "        년          월          일";
+
+  const W = 9400; const L = 2200;
+  const children = [];
+
+  // 서식 번호
+  children.push(p("■ 근로자퇴직급여 보장법 시행규칙 [별지 제1호서식]", { size: 16, bold: true, after: 60 }));
+  children.push(p(`  [${chkDB}] 확정급여형   [${chkDC}] 확정기여형   [${chkHY}] 혼합형`, { align: AT.CENTER, after: 80 }));
+  children.push(p("퇴직연금규약 신고서", { size: 32, bold: true, align: AT.CENTER, before: 80, after: 40 }));
+  children.push(p("※ 뒤쪽 작성요령을 읽고 작성하여 주시기 바라며, [ ]에는 해당되는 곳에 \"√\" 표시를 합니다.", { size: 14, color: "666666", align: AT.RIGHT, after: 40 }));
+  children.push(p("(앞쪽)", { size: 14, align: AT.RIGHT, after: 40 }));
+
+  // 발급번호
+  children.push(new Tbl({ width: { size: W, type: WT.DXA }, rows: [
+    new TRow({ children: [
+      cell("발급번호", 1400, { shade: true, align: AT.CENTER, bold: true }),
+      cell(data.issueNo||"", 2000, { align: AT.CENTER }), cell("접수일", 1000, { shade: true, align: AT.CENTER, bold: true }),
+      cell(data.receiptDate?fmtDate(data.receiptDate):"", 1200, { align: AT.CENTER }), cell("발급일", 1000, { shade: true, align: AT.CENTER, bold: true }),
+      cell(data.issueDate?fmtDate(data.issueDate):"", 1200, { align: AT.CENTER }), cell("처리기간", 800, { shade: true, align: AT.CENTER, bold: true, size: 16 }),
+      cell("7일", 800, { align: AT.CENTER }),
+    ]})
+  ]}));
+  children.push(p("", { after: 40 }));
+
+  // 신고내용 테이블
+  children.push(new Tbl({ width: { size: W, type: WT.DXA }, rows: [
+    new TRow({ children: [cell("신고내용", W, { span: 4, shade: true, bold: true, align: AT.CENTER })] }),
+    new TRow({ children: [cell("사업명\n(사업장명)", L, { shade: true, bold: true, align: AT.CENTER }), cell(data.companyName||"", 2500),
+      cell("사업자등록번호\n(법인등록번호)", L, { shade: true, bold: true, align: AT.CENTER }), cell(data.bizNo||"", 2500)] }),
+    new TRow({ children: [cell("대표자 성명", L, { shade: true, bold: true, align: AT.CENTER }), cell(data.ceoName||"", 2500),
+      cell("업종(주산품)", L, { shade: true, bold: true, align: AT.CENTER }), cell(data.industry||"", 2500)] }),
+    new TRow({ children: [cell("상시 근로자 수", L, { shade: true, bold: true, align: AT.CENTER }), cell((data.employeeCount||"")+"명", 2500, {align:AT.RIGHT}),
+      cell("노동조합원 수", L, { shade: true, bold: true, align: AT.CENTER }), cell((data.unionCount||"0")+"명", 2500, {align:AT.RIGHT})] }),
+    new TRow({ children: [cell("주소", L, { shade: true, bold: true, align: AT.CENTER }), cell(data.address||"", W-L, { span: 3 })] }),
+    new TRow({ children: [cell("전화번호", L, { shade: true, bold: true, align: AT.CENTER }), cell(data.phone||"", 2500),
+      cell("팩스(Fax)번호", L, { shade: true, bold: true, align: AT.CENTER }), cell(data.fax||"", 2500)] }),
+    new TRow({ children: [cell("퇴직급여제도\n형태", L, { shade: true, bold: true, align: AT.CENTER }),
+      cell("["+chkDB+"] 확정급여형퇴직연금제도     ["+chkDC+"] 확정기여형퇴직연금제도\n["+chkHY+"] 「근로자퇴직급여 보장법」 제6조에 따른 혼합형 퇴직연금제도\n[ ] 퇴직금제도\n※ 해당 사업(사업장) 적용되는 퇴직급여제도에 모두 표시합니다.", W-L, { span: 3, size: 16 })] }),
+    new TRow({ children: [cell("의견청취일\n또는 동의일", L, { shade: true, bold: true, align: AT.CENTER }), cell(fmtDate(data.opinionDate), W-L, { span: 3, align: AT.CENTER })] }),
+  ]}));
+
+  // 본문
+  children.push(p("", { before: 140 }));
+  children.push(p("「근로자퇴직급여 보장법」 제13조·제19조 및 같은 법 시행규칙 제2조에 따라 위와 같이 퇴직연금규약을 신고("+(isNew?"신규":"변경")+")합니다.", { align: AT.CENTER, before: 40, after: 100 }));
+  children.push(p(fmtDate(data.startDate), { align: AT.CENTER, before: 60, after: 100 }));
+  children.push(p("신고인(사업장 대표)    "+(data.ceoName||"")+"                              (서명 또는 인)", { align: AT.RIGHT, before: 60, after: 100 }));
+  children.push(p("("+(data.laborOffice||"       지방고용노동청장(지청장)")+") 귀하", { align: AT.CENTER, before: 40, after: 140 }));
+
+  // 첨부서류 + 수수료 통합 테이블
+  const attachText = isNew
+    ? "[신고의 경우]\n1. 퇴직연금규약\n2. 근로자대표의 동의를 받았거나 의견을 들었음을 증명하는 자료"
+    : "[변경 통보의 경우]\n1. 변경 전과 변경 후의 내용을 비교하여 작성한 퇴직연금규약\n2. 근로자대표의 동의를 받았음을 증명하는 자료(근로자에게 불리한 변경의 경우만 해당합니다) 또는 근로자대표의 의견을 들었음을 증명하는 자료";
+  children.push(p("", { before: 40 }));
+  children.push(new Tbl({ width: { size: W, type: WT.DXA }, rows: [
+    new TRow({ children: [cell("첨부서류", 2200, { shade: true, bold: true, align: AT.CENTER }), cell(attachText, 7200)] }),
+    new TRow({ children: [cell("수수료", 2200, { shade: true, bold: true, align: AT.CENTER }), cell("없음", 7200, { align: AT.CENTER })] }),
+  ]}));
+  children.push(p("210㎜×297㎜[백상지 80g/㎡]", { size: 14, color: "999999", align: AT.RIGHT, before: 40 }));
+
+  // ─── 2페이지: 작성요령 + 처리절차 ───
+  children.push(new Para({ pageBreakBefore: true, spacing: { after: 60 }, children: [new TR({ text: "(뒤쪽)", font: FONT, size: 14 })] }));
+  children.push(p("작성요령", { size: 22, bold: true, before: 40, after: 80 }));
+  const guidelines = [
+    '1. "사업명(사업장명)"란에는 「사업자등록증」의 상호명을 적습니다.',
+    '2. "대표자 성명"란에는 「사업자등록증」의 대표명을 적습니다.',
+    '3. "업종(주산품)"란에는 「사업자등록증」의 업종ㆍ업태를 적습니다.',
+    '4. "상시 근로자 수"란에는 \'(연 근무인원) ÷ (연 사업장 가동 일수)\'를 적습니다.',
+    '5. "노동조합원 수"란에는 노동조합이 있는 경우에는 조합원 수를 적고, 없는 경우에는 \'0\'으로 적습니다.',
+    '6. "주소"란에는 「사업자등록증」상 본점 소재지를 적습니다.',
+    '7. "전화번호"란에는 사업장 퇴직급여제도 업무 담당자의 연락 가능한 전화번호를 적습니다.',
+    '8. "팩스(Fax)번호"란에는 사업장의 문서 수신이 가능한 팩스번호를 적습니다.',
+    '9. "퇴직급여제도 형태"란은 신고(신규/변경) 후 해당 사업(사업장)에 적용되는 퇴직급여제도에 모두 표시합니다.',
+    '   ※ 혼합형 퇴직연금제도는 「근로자퇴직급여 보장법」 제6조에 따라 사용자가 가입자에 대하여 확정급여형퇴직연금제도 및 확정기여형퇴직연금제도를 함께 설정한 경우를 말합니다.(사용자가 두 제도를 각각 설정하고 가입자가 이 중 하나를 선택하는 경우 또는 가입자가 두 제도에 가입되는 기간을 서로 달리하여 운영하는 경우는 해당하지 않습니다.)',
+    '10. "의견청취일 또는 동의일"란에는 신고(신규/변경)하는 퇴직연금규약을 작성하기 위해 근로자대표의 의견청취나 동의를 받은 날을 적습니다.',
+    '11. "근로자대표"란 근로자의 과반수가 가입한 노동조합이 있는 경우에는 그 노동조합, 근로자의 과반수가 가입한 노동조합이 없는 경우에는 근로자 과반수를 말합니다.(「근로자퇴직급여 보장법」 제4조제3항)',
+  ];
+  for (const g of guidelines) {
+    children.push(p(g, { size: 16, before: 30, after: 30, line: 300, indent: g.startsWith("   ") ? 300 : 100 }));
+  }
+
+  // 처리절차
+  children.push(p("처리절차", { size: 22, bold: true, before: 200, after: 60 }));
+  children.push(p("이 신고서는 아래와 같이 처리됩니다.", { size: 16, before: 40, after: 80, indent: 100 }));
+
+  // 처리절차 테이블
+  const bdrT = { style: BS.SINGLE, size: 1, color: "000000" };
+  const bordersT = { top: bdrT, bottom: bdrT, left: bdrT, right: bdrT };
+  const procCell = (text, width, opts = {}) => new TCell({
+    borders: bordersT, width: { size: width, type: WT.DXA },
+    margins: { top: 60, bottom: 60, left: 80, right: 80 },
+    verticalAlign: VA.CENTER, columnSpan: opts.span || 1,
+    shading: opts.shade ? { fill: "F0F0F0", type: ShT.CLEAR } : undefined,
+    children: [new Para({ alignment: opts.align || AT.CENTER, spacing: { before: 20, after: 20 },
+      children: [new TR({ text: text, font: FONT, size: opts.size || 16, bold: opts.bold })] })]
+  });
+
+  children.push(new Tbl({ width: { size: 9400, type: WT.DXA }, rows: [
+    new TRow({ children: [procCell("신고인", 4700, { shade: true, bold: true }), procCell("처리기관", 4700, { shade: true, bold: true })] }),
+    new TRow({ children: [procCell("", 4700), procCell("지방고용노동관서", 4700, { bold: true })] }),
+    new TRow({ children: [procCell("규약 신고", 4700, { bold: true }), procCell("접수\n(민원실)", 4700)] }),
+    new TRow({ children: [procCell("", 4700), procCell("규약 심사\n(근로개선지도과)", 4700)] }),
+    new TRow({ children: [procCell("결과 통보", 4700, { bold: true }), procCell("결재\n[지방고용노동청장(지청장)]", 4700)] }),
+  ]}));
+
+  const doc = new Doc({
+    styles: { default: { document: { run: { font: FONT, size: 18 } } } },
+    sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1100, right: 1200, bottom: 1000, left: 1200 } } }, children }]
+  });
+  const typeNames = { DC: "DC형", DB: "DB형", HY: "혼합형" };
+  Pk.toBlob(doc).then(blob => __saveDocx(blob, (data.companyName||"회사명")+"_"+typeNames[planType]+"_퇴직연금규약_신고서.docx"));
+}
+
+// ─── Word 파일 생성 (브라우저) ──────────────────────
+function generateWordFile(generatedHtml, data, planType) {
+  const { Document: Doc, Packer: Pk, Paragraph: Para, TextRun: TR, AlignmentType: AT, PageBreak: PB } = docx;
+  const FONT = "맑은 고딕";
+
+  // HTML → 텍스트 변환 (테이블은 마커로 보존)
+  let html = generatedHtml;
+  const tables = [];
+  html = html.replace(/<\/pre><div[^>]*>.*?<table[^>]*>([\s\S]*?)<\/table>.*?<\/div><pre[^>]*>/g, (m, tc) => {
+    const tableData = []; const rm = tc.match(/<tr>([\s\S]*?)<\/tr>/g) || [];
+    for (const r of rm) { const cells = []; const cm = r.match(/<td[^>]*>([\s\S]*?)<\/td>/g) || []; for (const c of cm) cells.push(c.replace(/<[^>]+>/g, "").trim()); tableData.push(cells); }
+    const idx = tables.length; tables.push(tableData);
+    return "\n\n__TABLE_" + idx + "__\n";
+  });
+  const tmp = document.createElement("div"); tmp.innerHTML = html;
+  const text = tmp.textContent || tmp.innerText || "";
+  const lines = text.split("\n");
+
+  // 제목/회사명 추출
+  const titleMap2 = { DC: "확정기여형 퇴직연금 규약", DB: "확정급여형 퇴직연금 규약", HY: "혼합형 퇴직연금 규약" };
+  const regTitle = titleMap2[planType];
+  const companyName = data.companyName || "(주)○○○○";
+  const sf = data.startDate ? (()=>{const p=data.startDate.split("-");return p[0]+". "+parseInt(p[1])+".";})() : new Date().getFullYear() + ".";
+
+  // 표지
+  const coverChildren = [];
+  for (let i = 0; i < 7; i++) coverChildren.push(new Para({ spacing: { before: 200, after: 200 }, children: [] }));
+  coverChildren.push(new Para({ alignment: AT.CENTER, spacing: { before: 100, after: 100, line: 480 }, children: [new TR({ text: regTitle, font: FONT, size: 64, bold: true })] }));
+  coverChildren.push(new Para({ spacing: { before: 600 }, children: [] }));
+  coverChildren.push(new Para({ alignment: AT.CENTER, spacing: { before: 200, after: 200 }, children: [new TR({ text: sf, font: FONT, size: 28 })] }));
+  coverChildren.push(new Para({ spacing: { before: 200 }, children: [] }));
+  coverChildren.push(new Para({ alignment: AT.CENTER, spacing: { before: 200, after: 200 }, children: [new TR({ text: companyName, font: FONT, size: 48, bold: true })] }));
+
+  // 본문 파싱
+  const bodyChildren = [];
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // 규약 제목/회사명 스킵 (표지에 있으므로)
+    if (trimmed.match(/퇴직연금제도규약$/) || trimmed === companyName) continue;
+
+    // 장 제목
+    if (trimmed.match(/^제\d+장\s/)) {
+      bodyChildren.push(new Para({ alignment: AT.CENTER, spacing: { before: 480, after: 200, line: 360 }, children: [new TR({ text: trimmed, font: FONT, size: 26, bold: true })] }));
+      continue;
+    }
+
+    // 부칙 제목 (페이지 바꿈)
+    if (trimmed.match(/^【부\s*칙/)) {
+      bodyChildren.push(new Para({ pageBreakBefore: true, spacing: { before: 200, after: 200, line: 360 }, alignment: AT.CENTER, children: [new TR({ text: trimmed, font: FONT, size: 24, bold: true })] }));
+      continue;
+    }
+
+    // 별지 헤더 (페이지 바꿈)
+    if (trimmed.match(/^\[별지\]/)) {
+      bodyChildren.push(new Para({ pageBreakBefore: true, spacing: { before: 200, after: 120, line: 360 }, children: [new TR({ text: trimmed, font: FONT, size: 22, bold: true })] }));
+      continue;
+    }
+
+    // 조 제목 (제N조(~))
+    if (trimmed.match(/^제\d+조(?:의\d+)?\(/)) {
+      const m = trimmed.match(/^(제\d+조(?:의\d+)?\([^)]+\))\s*(.*)/);
+      if (m) {
+        const runs = [new TR({ text: m[1] + " ", font: FONT, size: 22, bold: true })];
+        if (m[2]) runs.push(new TR({ text: m[2], font: FONT, size: 22 }));
+        bodyChildren.push(new Para({ spacing: { before: 280, after: 60, line: 360 }, children: runs }));
+      }
+      continue;
+    }
+
+    // 항 (①②③...)
+    if (trimmed.match(/^[①②③④⑤⑥⑦⑧⑨⑩]/)) {
+      bodyChildren.push(new Para({ spacing: { before: 60, after: 60, line: 360 }, indent: { left: 200 }, children: [new TR({ text: trimmed, font: FONT, size: 22 })] }));
+      continue;
+    }
+
+    // 호 (1. 2. 3.)
+    if (trimmed.match(/^\d+(?:의\d+)?[\.\s]/)) {
+      bodyChildren.push(new Para({ spacing: { before: 40, after: 40, line: 360 }, indent: { left: 500 }, children: [new TR({ text: trimmed, font: FONT, size: 22 })] }));
+      continue;
+    }
+
+    // 목 (가. 나. 다.)
+    if (trimmed.match(/^[가나다라마바사아자차카타파하]\./)) {
+      bodyChildren.push(new Para({ spacing: { before: 30, after: 30, line: 360 }, indent: { left: 800 }, children: [new TR({ text: trimmed, font: FONT, size: 22 })] }));
+      continue;
+    }
+
+    // 주석 (※, ☞)
+    if (trimmed.match(/^※|^☞/)) {
+      bodyChildren.push(new Para({ spacing: { before: 60, after: 60, line: 360 }, indent: { left: 400 }, children: [new TR({ text: trimmed, font: FONT, size: 20, italics: true, color: "666666" })] }));
+      continue;
+    }
+
+    // 납입비율 표 관련
+    if (trimmed.match(/^<납입|^＜납입/)) {
+      bodyChildren.push(new Para({ spacing: { before: 160, after: 80, line: 360 }, indent: { left: 400 }, children: [new TR({ text: trimmed, font: FONT, size: 22, bold: true })] }));
+      continue;
+    }
+
+    // 납입비율 표 (Word 테이블)
+    if (trimmed.match(/^__TABLE_\d+__$/)) {
+      const idx = parseInt(trimmed.match(/\d+/)[0]);
+      const tableData = tables[idx];
+      if (tableData && tableData.length > 0) {
+        const { Table: Tbl, TableRow: TRow, TableCell: TCell, BorderStyle: BS, WidthType: WT, ShadingType: ShT } = docx;
+        const bdr = { style: BS.SINGLE, size: 1, color: "999999" };
+        const borders = { top: bdr, bottom: bdr, left: bdr, right: bdr };
+        const colCount = tableData[0].length;
+        const colW = Math.floor(9000 / colCount);
+        const rows = tableData.map((row, ri) => new TRow({
+          children: row.map(cell => new TCell({
+            borders, width: { size: colW, type: WT.DXA },
+            shading: ri === 0 ? { fill: "F3F4F6", type: ShT.CLEAR } : undefined,
+            margins: { top: 60, bottom: 60, left: 100, right: 100 },
+            children: [new Para({ alignment: AT.CENTER, spacing: { before: 20, after: 20 }, children: [new TR({ text: cell, font: FONT, size: 20, bold: ri === 0 })] })]
+          }))
+        }));
+        bodyChildren.push(new Para({ spacing: { before: 120, after: 40 }, indent: { left: 400 }, children: [new TR({ text: "＜납입 비율＞", font: FONT, size: 22, bold: true })] }));
+        bodyChildren.push(new Tbl({ width: { size: 9000, type: WT.DXA }, columnWidths: Array(colCount).fill(colW), rows }));
+        bodyChildren.push(new Para({ spacing: { before: 40, after: 80 }, children: [] }));
+      }
+      continue;
+    }
+
+    // 납입비율 텍스트 헤더 스킵 (이미 테이블로 처리)
+    if (trimmed.match(/^<납입|^＜납입/)) continue;
+
+    // 일반 텍스트
+    const indent = line.length - line.trimStart().length;
+    bodyChildren.push(new Para({ spacing: { before: 40, after: 40, line: 360 }, indent: { left: Math.max(200, indent * 60) }, children: [new TR({ text: trimmed, font: FONT, size: 22 })] }));
+  }
+
+  const margin = { top: 1400, right: 1200, bottom: 1400, left: 1200 };
+  const pageSize = { width: 11906, height: 16838 };
+  const doc = new Doc({
+    styles: { default: { document: { run: { font: FONT, size: 22 } } } },
+    sections: [
+      { properties: { page: { size: pageSize, margin } }, children: coverChildren },
+      { properties: { page: { size: pageSize, margin } }, children: bodyChildren }
+    ]
+  });
+
+  const typeNames2 = { DC: "DC형", DB: "DB형", HY: "혼합형" };
+  Pk.toBlob(doc).then(blob => __saveDocx(blob, `${companyName}_${typeNames2[planType]}_퇴직연금규약.docx`));
+}
+
+function StepIndicator({current}) {
+  return (<div style={S.stepIndicator}>{STEPS.map((s,i)=>(<div key={s} style={{display:"flex",alignItems:"center",gap:0}}><div style={{...S.stepDot,background:i<=current?"#5A2800":"#d1d5db",color:i<=current?"#fff":"#9ca3af",fontWeight:i===current?700:500}}>{i<current?"✓":i+1}</div><span style={{fontSize:11,fontWeight:i===current?700:400,color:i<=current?"#5A2800":"#9ca3af",marginLeft:4,marginRight:i<STEPS.length-1?2:0,whiteSpace:"nowrap"}}>{s}</span>{i<STEPS.length-1&&<div style={{width:20,height:1,background:i<current?"#5A2800":"#e5e7eb",margin:"0 2px"}}/>}</div>))}</div>);
+}
+
+// ─── Main App ───────────────────────────────────────
+function App() {
+  const [planType,setPlanType]=useState(null);
+  const [step,setStep]=useState(0);
+  const [data,setData]=useState({coverageType:"all",retroactive:"none",paymentCycle:"monthly",contributionRate:"12분의 1",extensionPeriod:"2month",educationDelegate:true,fiscalMonth:"12",contribMonth:"12",contribDay:"31",benefitType:"standard"});
+  const [generated,setGenerated]=useState("");
+  const [resultTab,setResultTab]=useState("summary");
+  const [faqOpen,setFaqOpen]=useState(null);
+  const preRef=useRef(null);
+  const set=(k,v)=>setData(p=>({...p,[k]:v}));
+  const allOps=[...(data.operationManagers||[]),...(data.operationManagersBanks||[]),...(data.operationManagersIns||[])];
+  const allAssets=[...(data.assetManagers||[]),...(data.assetManagersBanks||[]),...(data.assetManagersIns||[])];
+  const canProceed=()=>{
+    if(step===0) return data.companyName&&data.bizNo&&data.ceoName&&data.industry&&data.employeeCount&&data.address;
+    if(step===1&&planType==="DC") return data.contributionRate!=="기타";
+    if(step===1&&planType==="HY") return data.contributionRate!=="기타"&&data.dbRatio&&data.dcRatio&&(Number(data.dbRatio)+Number(data.dcRatio))>=100;
+    if(step===2&&planType==="HY"){const dbo=[...(data.dbOperationManagers||[]),...(data.dbOperationManagersBanks||[]),...(data.dbOperationManagersIns||[])];const dco=[...(data.dcOperationManagers||[]),...(data.dcOperationManagersBanks||[]),...(data.dcOperationManagersIns||[])];const dba=[...(data.dbAssetManagers||[]),...(data.dbAssetManagersBanks||[]),...(data.dbAssetManagersIns||[])];const dca=[...(data.dcAssetManagers||[]),...(data.dcAssetManagersBanks||[]),...(data.dcAssetManagersIns||[])];return dbo.length>0&&dco.length>0&&dba.length>0&&dca.length>0&&(dbo.length<=1||data.dbLeadProvider);}
+    if(step===2) return allOps.length>0&&allAssets.length>0&&(planType!=="DB"||allOps.length<=1||data.leadProvider);
+    if(step===3) return data.startDate;
+    return true;
+  };
+  const handleNext=()=>{if(step<4){if(step===3)setGenerated(planType==="DC"?generateDC(data):planType==="DB"?generateDB(data):generateHY(data));setStep(step+1);}};
+  const handleCopy=()=>{
+    // Convert HTML tables to text before extracting
+    let html=generated;
+    html=html.replace(/<\/pre><div[^>]*>.*?<table[^>]*>([\s\S]*?)<\/table>.*?<\/div><pre[^>]*>/g,(match,tc)=>{
+      let rows=[];const rm=tc.match(/<tr>([\s\S]*?)<\/tr>/g)||[];
+      for(const r of rm){const cells=[];const cm=r.match(/<td[^>]*>([\s\S]*?)<\/td>/g)||[];for(const c of cm)cells.push(c.replace(/<[^>]+>/g,"").trim());rows.push("      "+cells.join("\t"));}
+      return "\n\n    <납입 비율>\n"+rows.join("\n")+"\n";
+    });
+    const tmp=document.createElement("div");tmp.innerHTML=html;
+    navigator.clipboard.writeText(tmp.textContent||tmp.innerText||"").catch(()=>{});
+  };
+
+  if(!planType) return <TypeSelect onSelect={setPlanType} />;
+  const titleMap={DC:"확정기여형",DB:"확정급여형",HY:"혼합형"};
+  const typeLabel={DC:"DC",DB:"DB",HY:"혼합"};
+  const typeLabelFull={DC:"DC",DB:"DB",HY:"혼합형"};
+  const headerIconStyle=planType==="HY"?{...S.headerIcon,fontSize:11,letterSpacing:0,whiteSpace:"nowrap"}:S.headerIcon;
+
+  return (
+    <div style={S.root}>
+      <div style={S.header}>
+        <div style={headerIconStyle}>{typeLabelFull[planType]}</div>
+        <div>
+          <h1 style={S.headerTitle}>{titleMap[planType]} 퇴직연금 규약 자동생성</h1>
+          <p style={S.headerSub}>근로자퇴직급여 보장법 기반 · {typeLabel[planType]}형 표준규약</p>
+        </div>
+      </div>
+      <StepIndicator current={step} />
+      <div style={S.body}>
+        {step===0&&<Step1 data={data} set={set}/>}
+        {step===1&&planType==="DC"&&<Step2DC data={data} set={set}/>}
+        {step===1&&planType==="DB"&&<Step2DB data={data} set={set}/>}
+        {step===1&&planType==="HY"&&<Step2HY data={data} set={set}/>}
+        {step===2&&<Step3 data={data} set={set} planType={planType}/>}
+        {step===3&&<Step4 data={data} set={set} planType={planType}/>}
+        {step===4&&(
+          <div style={S.stepContent}>
+            <h2 style={S.stepTitle}>{typeLabel[planType]}형 규약 생성 완료</h2>
+            <div style={S.complianceCard}>
+              <h3 style={S.complianceTitle}>근퇴법 적합성 검증 ({typeLabel[planType]}형)</h3>
+              {complianceChecks(data,planType).map((c,i)=>(<div key={i} style={S.checkRow}><span style={{color:c.ok?"#059669":"#dc2626",marginRight:8,fontSize:16}}>{c.ok?"✓":"✗"}</span><span style={{color:c.ok?"#1f2937":"#dc2626"}}>{c.label}</span></div>))}
+            </div>
+            <div style={S.tabBar}>
+              {[{id:"summary",label:"핵심 요약"},{id:"full",label:"규약 전문"},{id:"faq",label:"자주 묻는 질문"},{id:"next",label:"NEXT STEP"}].map(t=>(
+                <button key={t.id} style={{...S.tabBtn,...(resultTab===t.id?S.tabActive:{})}} onClick={()=>setResultTab(t.id)}>{t.label}</button>
+              ))}
+            </div>
+            {resultTab==="summary"&&(
+              <div style={S.tabContent}>
+                {generateSummary(data,planType).map((sec,si)=>(
+                  <div key={si} style={{marginBottom:16}}>
+                    <div style={S.summarySectionTitle}>{sec.section}</div>
+                    <div>{sec.items.map((it,ii)=>(<div key={ii} style={S.summaryRow}><span style={S.summaryKey}>{it.k}</span><span style={S.summaryValue}>{it.v}</span></div>))}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {resultTab==="full"&&(
+              <div style={S.tabContent}>
+                <p style={{fontSize:12,color:"#6b7280",marginBottom:10}}>입력값이 <span class="hl">회색 배경</span>으로 표시되어 있습니다.</p>
+                <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+                  <button style={S.copyBtn} onClick={handleCopy}>규약 전문 복사</button>
+                  <button style={{...S.copyBtn,background:"#1e40af"}} onClick={()=>generateWordFile(generated,data,planType)}>Word 다운로드 (.docx)</button>
+                  <button style={{...S.copyBtn,background:"#065f46"}} onClick={()=>generateSingoWord(data,planType)}>신고서 다운로드 (.docx)</button>
+                  <button style={{...S.copyBtn,background:"#6b7280"}} onClick={()=>{window.__copyMode=true;generateWordFile(generated,data,planType)}}>규약 서식 복사 (Word 붙여넣기용)</button>
+                </div>
+                <div style={S.regulationBox}><pre style={S.regulationText} dangerouslySetInnerHTML={{__html:generated}} /></div>
+              </div>
+            )}
+            {resultTab==="faq"&&(
+              <div style={S.tabContent}>
+                <p style={{fontSize:12,color:"#6b7280",marginBottom:14}}>이 규약의 설정값을 기반으로 자동 생성된 Q&A입니다.</p>
+                {generateFAQ(data,planType).map((item,i)=>(
+                  <div key={i} style={{marginBottom:6}}>
+                    <button style={S.faqQuestion} onClick={()=>setFaqOpen(faqOpen===i?null:i)}>
+                      <span style={{flex:1,textAlign:"left"}}>{item.q}</span>
+                      <span style={{fontSize:11,color:"#9ca3af",marginLeft:8,flexShrink:0}}>{item.article}</span>
+                      <span style={{marginLeft:8,fontSize:12,color:"#9ca3af",transform:faqOpen===i?"rotate(180deg)":"rotate(0)"}}>▼</span>
+                    </button>
+                    {faqOpen===i&&<div style={S.faqAnswer}>{item.a.split("\n").map((line,j)=><p key={j} style={{margin:j>0?"8px 0 0":0,...(line.startsWith("(수식)")?{fontStyle:"italic",color:"#6b7280",fontSize:12}:{}),minHeight:line.trim()===""?8:undefined}}>{line||"\u00A0"}</p>)}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+            {resultTab==="chat"&&(
+              <div style={S.tabContent}><ChatBot regulation={generated} data={data} planType={planType} /></div>
+            )}
+            {resultTab==="next"&&(
+              <div style={S.tabContent}><NextStepTab data={data} planType={planType} /></div>
+            )}
+          </div>
+        )}
+      </div>
+      {step<4&&(<div style={S.footer}>{step===0?<button style={S.backBtn} onClick={()=>setPlanType(null)}>← 제도 선택</button>:<button style={S.backBtn} onClick={()=>setStep(step-1)}>← 이전</button>}<div style={{flex:1}}/><button style={{...S.nextBtn,opacity:canProceed()?1:0.4}} disabled={!canProceed()} onClick={handleNext}>{step===3?"규약 생성하기":"다음 →"}</button></div>)}
+      {step===4&&(<div style={S.footer}><button style={S.backBtn} onClick={()=>{setPlanType(null);setStep(0);}}>처음부터 다시</button><div style={{flex:1}}/></div>)}
+    </div>
+  );
+}
+
+const S = {
+  root:{fontFamily:"'NanumBarunGothic','Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif",maxWidth:720,margin:"0 auto",minHeight:"100vh",background:"#ffffff",color:"#1f2937"},
+  header:{display:"flex",alignItems:"center",gap:14,padding:"28px 24px 16px",background:"linear-gradient(135deg,#5A2800 0%,#6B3410 100%)",color:"#fff"},
+  headerIcon:{width:48,height:48,borderRadius:12,background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:800,letterSpacing:1,color:"#fff"},
+  headerTitle:{fontSize:18,fontWeight:800,margin:0},headerSub:{fontSize:12,margin:"4px 0 0",opacity:0.7},
+  stepIndicator:{display:"flex",alignItems:"center",justifyContent:"center",padding:"16px 12px",background:"#fff",borderBottom:"1px solid #e5e7eb",flexWrap:"wrap",gap:2},
+  stepDot:{width:24,height:24,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,flexShrink:0},
+  body:{padding:"0 0 80px"},stepContent:{padding:"20px 24px"},
+  stepTitle:{fontSize:18,fontWeight:800,margin:"0 0 4px",color:"#5A2800"},stepDesc:{fontSize:13,color:"#6b7280",margin:"0 0 20px"},
+  subTitle:{fontSize:14,fontWeight:700,margin:"20px 0 8px",color:"#374151"},
+  grid2:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12},field:{marginBottom:14},
+  label:{display:"block",fontSize:12,fontWeight:600,color:"#4b5563",marginBottom:5},
+  input:{width:"100%",padding:"10px 12px",fontSize:14,border:"1.5px solid #d1d5db",borderRadius:8,outline:"none",background:"#fff",color:"#1f2937",boxSizing:"border-box"},
+  radioGroup:{display:"flex",gap:16,padding:"4px 0"},radioLabel:{fontSize:13,display:"flex",alignItems:"center",gap:5,cursor:"pointer"},
+  chipGrid:{display:"flex",flexWrap:"wrap",gap:6},
+  chip:{padding:"6px 12px",borderRadius:20,fontSize:12,fontWeight:500,border:"1.5px solid #d1d5db",background:"#fff",color:"#4b5563",cursor:"pointer"},
+  chipActive:{background:"#5A2800",color:"#fff",borderColor:"#5A2800"},
+  footer:{position:"fixed",bottom:0,left:0,right:0,display:"flex",alignItems:"center",padding:"12px 24px",background:"#fff",borderTop:"1px solid #e5e7eb",maxWidth:720,margin:"0 auto",boxSizing:"border-box"},
+  backBtn:{padding:"10px 20px",borderRadius:8,fontSize:14,fontWeight:600,border:"1.5px solid #d1d5db",background:"#fff",color:"#4b5563",cursor:"pointer"},
+  nextBtn:{padding:"10px 28px",borderRadius:8,fontSize:14,fontWeight:700,border:"none",background:"#5A2800",color:"#fff",cursor:"pointer"},
+  complianceCard:{background:"#f0fdf4",borderRadius:12,padding:18,marginBottom:16,border:"1px solid #bbf7d0"},
+  complianceTitle:{fontSize:14,fontWeight:700,margin:"0 0 10px",color:"#065f46"},
+  checkRow:{display:"flex",alignItems:"center",padding:"3px 0",fontSize:13},
+  copyBtn:{padding:"8px 18px",borderRadius:8,fontSize:13,fontWeight:600,border:"none",background:"#5A2800",color:"#fff",cursor:"pointer"},
+  regulationBox:{background:"#fff",borderRadius:12,padding:20,border:"1px solid #e5e7eb",maxHeight:500,overflow:"auto"},
+  regulationText:{fontSize:12.5,lineHeight:1.75,whiteSpace:"pre-wrap",wordBreak:"break-word",fontFamily:"'D2Coding','Nanum Gothic Coding',monospace",margin:0,color:"#1f2937"},
+  tabBar:{display:"flex",gap:0,marginBottom:0,background:"#fff",borderRadius:"10px 10px 0 0",border:"1px solid #e5e7eb",borderBottom:"none",overflow:"hidden"},
+  tabBtn:{flex:1,padding:"10px 4px",fontSize:12,fontWeight:600,border:"none",background:"transparent",color:"#9ca3af",cursor:"pointer",borderBottom:"2.5px solid transparent"},
+  tabActive:{color:"#5A2800",background:"#fff8f2",borderBottom:"2.5px solid #5A2800"},
+  tabContent:{background:"#fff",borderRadius:"0 0 10px 10px",border:"1px solid #e5e7eb",borderTop:"1px solid #e5e7eb",padding:16,minHeight:300},
+  typeCard:{flex:1,padding:"20px 20px",borderRadius:14,border:"2px solid #e5e7eb",background:"#fff",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"},
+  infoBox:{background:"#fff8f2",borderRadius:10,padding:14,marginBottom:18,border:"1px solid #f5d0a9",display:"flex",gap:10,alignItems:"flex-start"},
+  caseBox:{background:"#f0fdf4",borderRadius:10,padding:14,marginBottom:18,border:"1px solid #bbf7d0"},
+  caseLabel:{display:"inline-block",fontSize:11,fontWeight:700,color:"#065f46",background:"#dcfce7",padding:"2px 10px",borderRadius:4,marginBottom:8},
+  warningBox:{background:"#fffbeb",borderRadius:10,padding:14,marginBottom:18,border:"1px solid #fde68a",display:"flex",alignItems:"flex-start"},
+  recBox:{background:"linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%)",borderRadius:10,padding:14,marginBottom:18,border:"1px solid #c7d2fe"},
+  summarySectionTitle:{fontSize:12,fontWeight:700,color:"#5A2800",padding:"6px 10px",background:"#fff8f2",borderRadius:6,marginBottom:6},
+  summaryRow:{display:"flex",padding:"5px 10px",fontSize:12.5,borderBottom:"1px solid #f3f4f6"},
+  summaryKey:{width:110,flexShrink:0,color:"#6b7280",fontWeight:500},summaryValue:{flex:1,color:"#1f2937"},
+  faqQuestion:{width:"100%",display:"flex",alignItems:"center",padding:"10px 12px",fontSize:13,fontWeight:600,color:"#1f2937",background:"#f9fafb",border:"1px solid #e5e7eb",borderRadius:8,cursor:"pointer"},
+  faqAnswer:{padding:"10px 14px",fontSize:12.5,color:"#374151",lineHeight:1.7,background:"#fff",border:"1px solid #e5e7eb",borderTop:"none",borderRadius:"0 0 8px 8px",marginTop:-1},
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
