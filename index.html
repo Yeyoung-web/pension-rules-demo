@@ -29,6 +29,7 @@ async function __saveDocx(blob, filename){
   }
   __showCopyFallback(blob,name);
 }
+function __siteUrl(){const base="https://yeyoung-web.github.io/pension-rules-demo/";try{const st=window.__appState||{};if(!st.planType)return base;return base+"#d="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify({p:st.planType,d:st.data})))));}catch(e){return base;}}
 async function __showCopyFallback(blob,name){
   let html="";
   try{const r=await mammoth.convertToHtml({arrayBuffer:await blob.arrayBuffer()});html=r.value;}catch(e){html="<p>문서를 불러오지 못했습니다.</p>";}
@@ -38,13 +39,16 @@ async function __showCopyFallback(blob,name){
   ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px";
   ov.innerHTML='<div style="background:#fff;color:#111;border-radius:12px;max-width:760px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;font-family:sans-serif">'+
    '<div style="padding:16px 20px;border-bottom:1px solid #eee"><div style="font-weight:700;font-size:16px;margin-bottom:6px">Word 파일 받기</div>'+
-   '<div style="font-size:13px;color:#444;line-height:1.5">공유 링크에서는 파일 다운로드가 제한됩니다. 아래 <b>서식째 복사</b>를 누른 뒤 Word 새 문서에 붙여넣고(⌘V / Ctrl+V) <b>'+name.replace(/</g,"&lt;")+'</b>로 저장하세요. 조문·표·굵은 글씨가 그대로 옮겨집니다.</div>'+
+   '<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 12px;margin:4px 0 10px;font-size:13px;line-height:1.6;color:#7c2d12"><b>왜 다른 주소로 옮겨야 하나요?</b><br>이 데모는 claude.ai 공유 링크 안에서 실행되는데, claude.ai가 보안상 <b>로그인하지 않은 방문자의 파일 다운로드를 막아 둡니다.</b> 그래서 같은 생성기를 별도 주소에도 올려 두었습니다. <b>실제 업무에서 쓰는 버전은 이 단계 없이 버튼 한 번으로 바로 .docx가 내려받아집니다.</b></div>'+
+   '<div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:10px 12px;margin:0 0 10px;font-size:13px;line-height:1.5;color:#1e3a8a"><b>서식 그대로 .docx 파일로 받기</b><br>아래 주소에는 <b>방금 입력하신 내용이 그대로 담겨 있습니다.</b> 주소를 복사해 <b>새 창 주소창</b>에 붙여넣으면 다시 입력할 필요 없이 결과 화면이 열리고, Word 다운로드 버튼으로 바로 받을 수 있습니다.<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><input id="__siteurl" readonly value="'+__siteUrl().replace(/"/g,"&quot;")+'" style="flex:1;min-width:220px;padding:6px 8px;border:1px solid #c7d2fe;border-radius:6px;font-size:13px;background:#fff"><button id="__sitecp" style="background:#1e3a8a;color:#fff;border:0;border-radius:6px;padding:6px 12px;cursor:pointer">주소 복사</button></div><div style="font-size:12px;color:#475569;margin-top:4px">링크를 클릭하면 이 창의 제한이 그대로 따라가서, 꼭 주소창에 붙여넣어 열어 주세요.</div></div>'+
+   '<div style="font-size:13px;color:#444;line-height:1.5">또는 이 화면에서 바로: 공유 링크에서는 파일 다운로드가 제한됩니다. 아래 <b>서식째 복사</b>를 누른 뒤 Word 새 문서에 붙여넣고(⌘V / Ctrl+V) <b>'+name.replace(/</g,"&lt;")+'</b>로 저장하세요. 조문·표·굵은 글씨가 그대로 옮겨집니다.</div>'+
    '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button id="__cpbtn" style="background:#1e40af;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer">서식째 복사</button>'+
    '<button id="__cpclose" style="background:#eee;border:0;border-radius:8px;padding:10px 16px;cursor:pointer">닫기</button><span id="__cpmsg" style="font-size:13px;align-self:center;color:#065f46"></span></div></div>'+
    '<div id="__cpdoc" style="overflow:auto;padding:20px 28px;background:#fafafa"></div></div>';
   document.body.appendChild(ov);
   ov.querySelector("#__cpdoc").innerHTML=docHtml;
   ov.querySelector("#__cpclose").onclick=()=>ov.remove();
+  ov.querySelector("#__sitecp").onclick=async()=>{const i=ov.querySelector("#__siteurl");i.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){};if(!ok){try{await navigator.clipboard.writeText(i.value);ok=true}catch(_){}}ov.querySelector("#__sitecp").textContent=ok?"복사됨":"⌘C로 복사";};
   ov.querySelector("#__cpbtn").onclick=async()=>{
     const msg=ov.querySelector("#__cpmsg");const box=ov.querySelector("#__cpdoc");
     let ok=false;
@@ -153,7 +157,7 @@ function TypeSelect({onSelect}) {
 function Step1({data,set}) {
   return (<div style={S.stepContent}>
     <h2 style={S.stepTitle}>기업 기본정보 입력</h2>
-    <p style={S.stepDesc}>사업자등록증 기준으로 입력해주세요.</p>
+    <p style={S.stepDesc}>사업자등록증 기준으로 입력해주세요. <button type="button" onClick={()=>{const ex={companyName:"(주)예시상사",bizNo:"123-45-67890",ceoName:"홍길동",industry:INDUSTRY_OPTIONS.includes("정보통신업")?"정보통신업":INDUSTRY_OPTIONS[0],employeeCount:"30",unionCount:"0",address:"서울시 성북구 안암로 145",startDate:"2027-01-01"};Object.entries(ex).forEach(([k,v])=>set(k,v));}} style={{marginLeft:8,padding:"3px 10px",fontSize:12,border:"1px solid #c9b8a8",borderRadius:6,background:"#fff",color:"#5c3a1e",cursor:"pointer"}}>예시 기업으로 채우기</button></p>
     <div style={S.grid2}>
       <Field label="회사명 (상호)" required><input style={S.input} placeholder="(주)○○○○" value={data.companyName||""} onChange={e=>set("companyName",e.target.value)} /></Field>
       <Field label="사업자등록번호" required><input style={S.input} placeholder="000-00-00000" value={data.bizNo||""} onChange={e=>set("bizNo",formatBizNo(e.target.value))} /></Field>
@@ -2424,6 +2428,8 @@ function App() {
   const [generated,setGenerated]=useState("");
   const [resultTab,setResultTab]=useState("summary");
   const [faqOpen,setFaqOpen]=useState(null);
+  useEffect(()=>{try{const m=location.hash.match(/^#d=(.+)$/);if(m){const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));if(o&&o.p&&o.d){setPlanType(o.p);setData(o.d);setGenerated(o.p==="DC"?generateDC(o.d):o.p==="DB"?generateDB(o.d):generateHY(o.d));setResultTab("full");setStep(4);}}}catch(e){}},[]);
+  window.__appState={data,planType};
   const preRef=useRef(null);
   const set=(k,v)=>setData(p=>({...p,[k]:v}));
   const allOps=[...(data.operationManagers||[]),...(data.operationManagersBanks||[]),...(data.operationManagersIns||[])];
